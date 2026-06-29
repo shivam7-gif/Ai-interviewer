@@ -1,21 +1,21 @@
 import { useState, useRef, useEffect } from "react";
 
 const languages = [
-  { name: "JavaScript", color: "#f7c948" },
-  { name: "TypeScript", color: "#3178c6" },
-  { name: "Python",     color: "#3572A5" },
-  { name: "Java",       color: "#b07219" },
-  { name: "C++",        color: "#f34b7d" },
-  { name: "C",          color: "#555555" },
-  { name: "C#",         color: "#178600" },
-  { name: "Go",         color: "#00ADD8" },
-  { name: "Rust",       color: "#dea584" },
-  { name: "Kotlin",     color: "#A97BFF" },
-  { name: "Swift",      color: "#F05138" },
-  { name: "Ruby",       color: "#701516" },
-  { name: "PHP",        color: "#4F5D95" },
-  { name: "Scala",      color: "#c22d40" },
-  { name: "Dart",       color: "#00B4AB" },
+  { name: "JavaScript",  },
+  { name: "TypeScript", },
+  { name: "Python",      },
+  { name: "Java",        },
+  { name: "C++",         },
+  { name: "C",           },
+  { name: "C#",          },
+  { name: "Go",          },
+  { name: "Rust",        },
+  { name: "Kotlin",      },
+  { name: "Swift",       },
+  { name: "Ruby",        },
+  { name: "PHP",         },
+  { name: "Scala",       },
+  { name: "Dart",      },
 ];
 
 interface ChangeLangProps {
@@ -64,7 +64,7 @@ export const ChangeLang = ({ onChange }: ChangeLangProps) => {
         }}
       >
         <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: selected.color, display: "inline-block" }} />
+          <span style={{ width: 8, height: 8, borderRadius: "50%", display: "inline-block" }} />
           {selected.name}
         </span>
         <span style={{ fontSize: 12, opacity: 0.6, transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>▾</span>
@@ -104,7 +104,7 @@ export const ChangeLang = ({ onChange }: ChangeLangProps) => {
                 textAlign: "left",
               }}
             >
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: lang.color, flexShrink: 0, display: "inline-block" }} />
+              <span style={{ width: 8, height: 8, borderRadius: "50%", flexShrink: 0, display: "inline-block" }} />
               {lang.name}
             </button>
           ))}
