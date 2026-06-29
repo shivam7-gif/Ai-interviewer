@@ -4,10 +4,10 @@ import {
   getAllPlaylists,
   getPlaylistById,
   getPlaylistQuestions,
-} from "../controllers/playlist.controller";
+} from "../controller/playlist.controller.js";
 
-router.get("/",getAllPlaylists);
-router.get("/:id",getPlaylistById);
-router.get("/:id/questions",getPlaylistQuestions);
+router.get("/", getAllPlaylists);
+router.get("/:id", getPlaylistById);
+router.get("/:id/questions", getPlaylistQuestions);
 
 export default router;

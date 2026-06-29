@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import http from "http";
 import { intializeSocket } from "./socket.js";
-import playlistRoutes from "./routes/playlist.routes";
+import playlistRoutes from "../routes/Playlist.routes.js";
 dotenv.config();
 const PORT = process.env.PORT || 5000;
 
@@ -14,9 +14,9 @@ app.use(express.json());
 app.use("/api/playlists", playlistRoutes);
 const server = http.createServer(app);
 intializeSocket(server);
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
   res.send("Server is running bruhh :");
-})
-server.listen(PORT,()=>{
+});
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-})
+});
