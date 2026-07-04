@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Profile } from "../components/Profile";
-
+import {Toaster} from "sonner";
+import {Form} from "../components/Form";
 export const Dashboard = () => {
   const navigate = useNavigate();
 
@@ -15,6 +16,8 @@ export const Dashboard = () => {
         <Profile />
         <button onClick={handleNavigation}>Redirect to ide</button>
       </div>
+      <Toaster/>
+      <Form/>
     </div>
   );
 };

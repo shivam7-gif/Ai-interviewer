@@ -4,9 +4,12 @@ import { Ide } from "../components/Ide";
 import { ChangeLang } from "../components/ChangeLanguage";
 import { TopBar } from "../components/TopBar";
 import { ProblemPanel } from "../components/ProblemPanel";
+import {useAuth} from "../context/AuthContext";
 
 export const Project = () => {
   const { id } = useParams();
+  const {user} = useAuth();
+  
   const editorRef = useRef(null);
   const [language, setLanguage] = useState("javascript");
 

@@ -3,6 +3,7 @@ import { Project } from "./pages/Project";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Dashboard } from "./pages/Dashboard";
 import { LoginPage } from "./pages/Login";
+import { LandingPage } from "./pages/LandingPage";
 function App() {
   return (
     <div>
@@ -15,6 +16,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path ="/" element ={<LandingPage/>} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/project/:id" element={<Project />} />
       </Routes>
