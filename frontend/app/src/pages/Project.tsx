@@ -4,12 +4,13 @@ import { Ide } from "../components/Ide";
 import { ChangeLang } from "../components/ChangeLanguage";
 import { TopBar } from "../components/TopBar";
 import { ProblemPanel } from "../components/ProblemPanel";
-import {useAuth} from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
+import { AIInterviewer } from "../components/AIInterviewer/AIInterviewer";
 
 export const Project = () => {
-  const { id } = useParams();
-  const {user} = useAuth();
-  
+  const { projectId } = useParams();
+  const { user } = useAuth();
+
   const editorRef = useRef(null);
   const [language, setLanguage] = useState("javascript");
 
@@ -24,18 +25,19 @@ export const Project = () => {
 
   return (
     <div style={s.shell}>
-      <TopBar sessionId={id} onRun={handleRun} />
+      <TopBar sessionId={projectId} onRun={handleRun} />
 
       <div style={s.body}>
-        {/* LEFT — you'll build this */}
         <div style={s.left}>
           <div style={s.panelHeader}>AI interviewer</div>
-          <div style={s.aiPlaceholder}>
-            {/* your AI interviewer goes here */}
-          </div>
+          <AIInterviewer
+            projectId={projectId!}
+            user={user!}
+            editorRef={editorRef}
+            language={language}
+          />
         </div>
 
-        {/* CENTER — editor */}
         <div style={s.center}>
           <div style={s.editorBar}>
             <ChangeLang onChange={(lang) => setLanguage(lang.toLowerCase())} />
@@ -45,7 +47,6 @@ export const Project = () => {
           </div>
         </div>
 
-        {/* RIGHT — problem */}
         <ProblemPanel />
       </div>
     </div>

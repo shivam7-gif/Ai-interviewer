@@ -55,6 +55,10 @@ async function seed() {
   for (const { playlist, slugs } of data) {
     const [inserted] = await db.insert(playlists).values(playlist).returning();
 
+    if (!inserted) {
+      throw new Error("Failed to create playlist");
+    }
+
     await db.insert(questions).values(
       slugs.map((slug, i) => ({
         playlistId: inserted.id,

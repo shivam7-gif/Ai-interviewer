@@ -16,9 +16,9 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path ="/" element ={<LandingPage/>} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/project/:id" element={<Project />} />
+        <Route path="/project/:projectId" element={<Project />} />
       </Routes>
     </div>
   );

@@ -1,10 +1,11 @@
+import type { Request, Response } from "express";
 import { db } from "../database/index.js";
 import { playlists, questions } from "../database/schema.js";
 import { eq } from "drizzle-orm";
 
 const BASE_URL = "https://alfa-leetcode-api.onrender.com";
 
-export const getAllPlaylists = async (req, res) => {
+export const getAllPlaylists = async (req: Request, res: Response) => {
   try {
     const result = await db.select().from(playlists);
 
@@ -12,23 +13,30 @@ export const getAllPlaylists = async (req, res) => {
       success: true,
       data: result,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 };
 
 // GET /api/playlists/:id
-export const getPlaylistById = async (req, res) => {
+export const getPlaylistById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const playlistId = Array.isArray(id) ? id[0] : id;
+    if (!playlistId) {
+      return res.status(400).json({
+        success: false,
+        message: "Playlist id is required",
+      });
+    }
 
     const [playlist] = await db
       .select()
       .from(playlists)
-      .where(eq(playlists.id, id));
+      .where(eq(playlists.id, playlistId));
 
     if (!playlist) {
       return res.status(404).json({
@@ -41,23 +49,30 @@ export const getPlaylistById = async (req, res) => {
       success: true,
       data: playlist,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 };
 
 // GET /api/playlists/:id/questions
-export const getPlaylistQuestions = async (req, res) => {
+export const getPlaylistQuestions = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const playlistId = Array.isArray(id) ? id[0] : id;
+    if (!playlistId) {
+      return res.status(400).json({
+        success: false,
+        message: "Playlist id is required",
+      });
+    }
 
     const [playlist] = await db
       .select()
       .from(playlists)
-      .where(eq(playlists.id, id));
+      .where(eq(playlists.id, playlistId));
 
     if (!playlist) {
       return res.status(404).json({
@@ -70,7 +85,7 @@ export const getPlaylistQuestions = async (req, res) => {
     const qs = await db
       .select()
       .from(questions)
-      .where(eq(questions.playlistId, id))
+      .where(eq(questions.playlistId, playlistId))
       .orderBy(questions.orderIndex);
 
     // fetch content from LeetCode API for each slug
@@ -84,7 +99,6 @@ export const getPlaylistQuestions = async (req, res) => {
           return {
             id: q.id,
             slug: q.slug,
-            leetcodeUrl: q.leetcodeUrl,
             orderIndex: q.orderIndex,
             title: data.questionTitle,
             difficulty: data.difficulty,
@@ -106,14 +120,14 @@ export const getPlaylistQuestions = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      playlistId: id,
+      playlistId: playlistId,
       playlistTitle: playlist.title,
       questions: withContent,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 };
