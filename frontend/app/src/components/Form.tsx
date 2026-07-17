@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import axios from "axios";
-import { BACKEND_URL } from "../config/lib/config";
+import { BACKEND_URL } from "../lib/config";
 import { useNavigate } from "react-router-dom";
 
 export function Form() {

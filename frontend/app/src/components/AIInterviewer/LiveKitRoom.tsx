@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Room, RoomEvent } from "livekit-client";
-import { BACKEND_URL } from "../../config/lib/config";
+import { BACKEND_URL } from "../../lib/config";
 
 interface Props {
   projectId: string;

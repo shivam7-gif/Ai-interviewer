@@ -1,95 +1,61 @@
-import express, { type Request, type Response } from "express";
+import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import axios from "axios";
 import http from "http";
-import { preInterviewBody } from "../types.js";
-import { intializeSocket } from "./socket.js";
-import playlistRoutes from "../routes/Playlist.routes.js";
-import { prisma } from "../db.js";
-import liveKitRouter from "../routes/livekit.js";
 
+import { initializeSocket } from "./lib/socket.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import interviewRoutes from "./routes/interview.routes.js";
+import playlistRoutes from "./routes/playlist.routes.js";
+import liveKitRoutes from "./routes/livekit.routes.js";
 
+// ── Load environment variables ────────────────────────────────────────────────
 dotenv.config();
-const PORT = process.env.PORT || 3001;
 
+const PORT = process.env.PORT ?? 3001;
+const CORS_ORIGIN = process.env.CORS_ORIGIN ?? "*";
+
+// ── App setup ─────────────────────────────────────────────────────────────────
 const app = express();
+
 app.use(
   cors({
-    origin: "*",
+    origin: CORS_ORIGIN,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
-// routes
+// ── Health check ──────────────────────────────────────────────────────────────
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok", service: "InterviewOS AI", timestamp: new Date().toISOString() });
+});
+
+// ── Routes ────────────────────────────────────────────────────────────────────
+app.use("/api/v1", interviewRoutes);
 app.use("/api/playlists", playlistRoutes);
-app.use("/api/livekit",liveKitRouter);
+app.use("/api/livekit", liveKitRoutes);
 
+// ── Error handling middleware (must be last) ──────────────────────────────────
+app.use(errorHandler);
+
+// ── HTTP server + Socket.IO ───────────────────────────────────────────────────
 const server = http.createServer(app);
-intializeSocket(server);
+initializeSocket(server);
 
-app.post("/api/v1/pre-interview", async (req: Request, res: Response) => {
-  const parsed = preInterviewBody.safeParse(req.body);
-
-  if (!parsed.success) {
-    res.status(411).json({
-      message: "incorrect body",
-    });
-    return;
-  }
-
-  const { gitHub } = parsed.data;
-
-  const gitHubUsername = gitHub.endsWith("/")
-    ? gitHub.slice(0, -1).split("/").pop()
-    : gitHub.split("/").pop();
-
-  console.log("GitHub username : ", gitHubUsername);
-
-  try {
-    const userRepos = await axios.get(
-      `https://api.github.com/users/${gitHubUsername}/repos`
-    );
-
-    const filteredUserRepos = userRepos.data.map((x: any) => ({
-      description: x.description,
-      name: x.name,
-      fullName: x.full_name,
-      starcount: x.stargazers_count,
-    }));
-
-    console.log("Filtered repos:", filteredUserRepos);
-
-    const createdInterview = await prisma.interView.create({
-      data: {
-        metaData: {
-          githubUrl: gitHub,
-          repos: filteredUserRepos,
-        },
-        status: "Pre",
-        score: 0,
-      },
-    });
-
-    res.json({
-      success: true,
-      projectId: createdInterview.id,
-      repos: filteredUserRepos,
-    });
-  } catch (error) {
-    console.error("Error fetching GitHub repos:", error);
-    res.status(500).json({
-      message: "Failed to fetch GitHub repositories",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Server is running bruhh :");
-});
-
+// ── Start ─────────────────────────────────────────────────────────────────────
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`\n🚀 InterviewOS AI backend running on port ${PORT}`);
+  console.log(`   Environment : ${process.env.NODE_ENV ?? "development"}`);
+  console.log(`   Health      : http://localhost:${PORT}/health\n`);
+});
+
+// ── Graceful shutdown ─────────────────────────────────────────────────────────
+process.on("SIGTERM", () => {
+  console.log("[Server] SIGTERM received – shutting down gracefully");
+  server.close(() => {
+    console.log("[Server] HTTP server closed");
+    process.exit(0);
+  });
 });
