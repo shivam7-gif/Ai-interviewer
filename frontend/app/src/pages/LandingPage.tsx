@@ -107,7 +107,6 @@ export const LandingPage = () => {
               ["Node.js + Express", "Backend"],
               ["PostgreSQL", "Database"],
               ["Prisma ORM", "Data layer"],
-              ["Drizzle ORM", "Query builder"],
               ["LiveKit", "WebRTC voice"],
               ["Socket.IO", "Real-time events"],
               ["Google OAuth", "Authentication"],

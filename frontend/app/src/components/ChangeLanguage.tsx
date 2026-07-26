@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-
+import {useLanguageStore } from "../stores/LanguageStore"
 const languages = [
   { name: "JavaScript",  },
   { name: "TypeScript", },
@@ -23,7 +23,9 @@ interface ChangeLangProps {
 }
 
 export const ChangeLang = ({ onChange }: ChangeLangProps) => {
-  const [selected, setSelected] = useState(languages[0]);
+  const selected = useLanguageStore((s)=> s.language);
+  const setLanguage = useLanguageStore((s)=>s.setLanguage);
+
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +40,7 @@ export const ChangeLang = ({ onChange }: ChangeLangProps) => {
   }, []);
 
   function select(lang: typeof languages[0]) {
-    setSelected(lang);
+    setLanguage(lang);
     setOpen(false);
     onChange?.(lang.name);
   }

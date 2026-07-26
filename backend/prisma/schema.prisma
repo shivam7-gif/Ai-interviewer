@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -12,26 +10,56 @@ datasource db {
   provider = "postgresql"
 }
 
-model InterView{
-  id  String @id @default(uuid())
-  metaData  Json 
-  status  InterviewStatus
-  score Int @default(0)
+model InterView {
+  id            String          @id @default(uuid())
+  metaData      Json
+  status        InterviewStatus
+  score         Int             @default(0)
   conversations Message[]
 }
-model Message{
-  id String @id @default(uuid())
-  message String
-  type MessageType
+
+model Message {
+  id          String      @id @default(uuid())
+  message     String
+  type        MessageType
   interviewId String
-  interview InterView @relation(fields : [interviewId],references : [id])
+  interview   InterView   @relation(fields: [interviewId], references: [id])
 }
-enum MessageType{
+
+model Playlist {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  difficulty  Difficulty
+  createdAt   DateTime   @default(now()) @map("created_at")
+  questions   Question[]
+
+  @@map("playlists")
+}
+
+model Question {
+  id         String   @id @default(uuid())
+  playlistId String   @map("playlist_id")
+  slug       String
+  orderIndex Int      @map("order_index")
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@map("questions")
+}
+
+enum MessageType {
   User
   Assistance
 }
-enum InterviewStatus{
+
+enum InterviewStatus {
   Pre
   InProgress
   Done
+}
+
+enum Difficulty {
+  Beginner
+  Intermediate
+  Advanced
 }

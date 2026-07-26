@@ -1,7 +1,5 @@
 import type { Request, Response } from "express";
-import { db } from "../config/drizzle.js";
-import { playlists, questions } from "../../database/schema.js";
-import { eq } from "drizzle-orm";
+import { prisma } from "../config/db.js";
 
 const LEETCODE_API_BASE = "https://alfa-leetcode-api.onrender.com";
 
@@ -10,11 +8,13 @@ const LEETCODE_API_BASE = "https://alfa-leetcode-api.onrender.com";
  * Returns all playlists.
  */
 export const getAllPlaylists = async (
-  req: Request,
+  _req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const result = await db.select().from(playlists);
+    const result = await prisma.playlist.findMany({
+      orderBy: { createdAt: "desc" },
+    });
     res.status(200).json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({
@@ -32,7 +32,7 @@ export const getPlaylistById = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   if (!id) {
     res.status(400).json({ success: false, message: "Playlist ID is required" });
@@ -40,10 +40,7 @@ export const getPlaylistById = async (
   }
 
   try {
-    const [playlist] = await db
-      .select()
-      .from(playlists)
-      .where(eq(playlists.id, id));
+    const playlist = await prisma.playlist.findUnique({ where: { id } });
 
     if (!playlist) {
       res.status(404).json({ success: false, message: "Playlist not found" });
@@ -67,7 +64,7 @@ export const getPlaylistQuestions = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   if (!id) {
     res.status(400).json({ success: false, message: "Playlist ID is required" });
@@ -75,21 +72,17 @@ export const getPlaylistQuestions = async (
   }
 
   try {
-    const [playlist] = await db
-      .select()
-      .from(playlists)
-      .where(eq(playlists.id, id));
+    const playlist = await prisma.playlist.findUnique({ where: { id } });
 
     if (!playlist) {
       res.status(404).json({ success: false, message: "Playlist not found" });
       return;
     }
 
-    const qs = await db
-      .select()
-      .from(questions)
-      .where(eq(questions.playlistId, id))
-      .orderBy(questions.orderIndex);
+    const qs = await prisma.question.findMany({
+      where: { playlistId: id },
+      orderBy: { orderIndex: "asc" },
+    });
 
     const withContent = await Promise.all(
       qs.map(async (q) => {

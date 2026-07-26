@@ -1,20 +1,24 @@
 import Editor from "@monaco-editor/react";
+import { useMonacoLanguage } from "../stores/LanguageStore";
 
 interface IdeProps {
   onMount?: (editor: any, monaco: any) => void;
-  language?: string;
   defaultValue?: string;
 }
 
 export const Ide = ({
   onMount,
-  language = "javascript",
   defaultValue = "// Write your solution here\n",
 }: IdeProps) => {
+  // Reads the selected language from the store and converts it to Monaco's
+  // id format ("C++" -> "cpp"). Re-renders automatically whenever ChangeLang
+  // calls setLanguage — no prop needs to be threaded through.
+  const monacoLanguage = useMonacoLanguage();
+
   return (
     <Editor
       height="100%"
-      language={language}
+      language={monacoLanguage}
       defaultValue={defaultValue}
       onMount={onMount}
       theme="vs-dark"

@@ -16,7 +16,5 @@ export const leetCodeQuestionService =async (companyName: string[])=>{
             url += `https://alfa-leetcode-api.onrender.com/company/${mappedCompanyName}`;
         }
     });
-    return (
-        
-    )
-}
+    return url;
+};

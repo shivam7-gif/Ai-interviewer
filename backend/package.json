@@ -13,7 +13,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "db:seed": "tsx database/seed.ts",
+    "db:seed": "tsx prisma/seed.ts",
     "lint": "tsc --noEmit"
   },
   "keywords": ["ai", "interview", "livekit", "realtime", "typescript"],
@@ -24,7 +24,6 @@
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "drizzle-orm": "^0.45.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.16.0",
@@ -39,7 +38,6 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^26.0.1",
     "@types/pg": "^8.20.0",
-    "drizzle-kit": "^0.31.10",
     "prisma": "^7.8.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
