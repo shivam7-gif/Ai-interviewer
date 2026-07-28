@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, Bookmark, ImageIcon, Flag } from "lucide-react";
+import { Copy, Check, Bookmark, ImageIcon, Flag, FileText, Star, BookOpen, MessageSquare, History } from "lucide-react";
 
 // ---------- Types ----------
 
@@ -52,7 +52,13 @@ const defaultProblem: ProblemDashboardProps["problem"] = {
   ],
 };
 
-const NAV_ITEMS = ["Description", "Solution", "Editorial", "Discussions", "Submissions"] as const;
+const NAV_ITEMS = [
+  { id: "Description", icon: FileText },
+  { id: "Solution", icon: Star },
+  { id: "Editorial", icon: BookOpen, suffix: "3/3" },
+  { id: "Discussions", icon: MessageSquare },
+  { id: "Submissions", icon: History },
+] as const;
 
 const DIFFICULTY_STYLES: Record<string, string> = {
   Easy: "text-emerald-400 border-emerald-800 bg-emerald-950",
@@ -60,10 +66,71 @@ const DIFFICULTY_STYLES: Record<string, string> = {
   Hard: "text-rose-400 border-rose-800 bg-rose-950",
 };
 
+const solutionCode = `#include <bits/stdc++.h>
+using namespace std;
+
+vector<int> Solution(int N, int M, vector<pair<int,int>>& edges){
+    vector<vector<int>> adj(N+1);
+    for(auto &e :edges){
+        int u = e.first;
+        int v = e.second;
+        adj[u].push_back(v);
+    }
+    vector<int> indegree(N+1,0);
+    for(auto &e : edges){
+        indegree[e.second]++;
+    }
+    // instead of queue we will use min heap for lex smallest top sort
+    priority_queue<int,vector<int>,greater<int>>pq;
+    for(int i =1;i <=N;i++){
+        if(indegree[i]==0){
+            pq.push(i);
+        }
+    }
+    vector<int> ans;
+    while(!pq.empty()){
+        int u = pq.top();
+        pq.pop();
+        ans.push_back(u);
+        for(int v : adj[u]){
+            indegree[v]--;
+            if(indegree[v] == 0){
+                pq.push(v);
+            }
+        }
+    }
+    if(ans.size()!=N){
+        return {-1};
+    }
+    return ans;
+}
+
+int main(){
+    int T;
+    scanf("%d",&T);
+    while(T--){
+        int N,M;
+        scanf("%d %d",&N,&M);
+        vector<pair<int,int>> edges(M);
+        for(int i=0;i<M;i++){
+            int a,b;
+            scanf("%d %d",&a,&b);
+            edges[i]=make_pair(a,b);
+        }
+        vector<int> result = Solution(N,M,edges);
+        for(size_t i=0;i<result.size();i++){
+            printf("%d", result[i]);
+            if(i+1<result.size()) printf(" ");
+        }
+        printf("\\n");
+    }
+    return 0;
+}`;
+
 // ---------- Component ----------
 
 export const ProblemDashboard = ({ problem }: ProblemDashboardProps) => {
-  const [activeTab, setActiveTab] = useState<(typeof NAV_ITEMS)[number]>("Description");
+  const [activeTab, setActiveTab] = useState<(typeof NAV_ITEMS)[number]["id"]>("Description");
   const [saved, setSaved] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
@@ -95,22 +162,25 @@ export const ProblemDashboard = ({ problem }: ProblemDashboardProps) => {
     // most host app shells so this panel reads as its own surface instead
     // of melting into the page behind it. Border-l gives it a hard edge
     // when dropped into a split layout like an IDE / interview panel.
-    <div className="h-full min-w-0 w-full bg-zinc-900 text-zinc-200 font-sans flex flex-col overflow-hidden border-l border-zinc-800">
+    <div className="h-full min-w-0 w-full bg-[#0a0a0c] text-zinc-300 font-sans flex flex-col overflow-hidden border-l border-zinc-800/50">
       {/* Tab bar */}
-      <div className="flex items-center gap-1 border-b border-zinc-800 bg-zinc-950 px-3 overflow-x-auto shrink-0">
+      <div className="flex items-center gap-6 border-b border-zinc-800/80 bg-zinc-950/50 px-6 overflow-x-auto shrink-0 hide-scrollbar">
         {NAV_ITEMS.map((item) => {
-          const active = item === activeTab;
+          const active = item.id === activeTab;
+          const Icon = item.icon;
           return (
             <button
-              key={item}
-              onClick={() => setActiveTab(item)}
-              className={`relative shrink-0 px-3 py-3 text-[13px] transition-colors ${
-                active ? "text-zinc-50 font-medium" : "text-zinc-500 hover:text-zinc-300"
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`relative shrink-0 py-3.5 flex items-center gap-1.5 text-[13px] tracking-wide transition-colors ${
+                active ? "text-zinc-100 font-medium" : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              {item}
+              <Icon size={14} className={active ? "text-amber-400" : ""} />
+              {item.id}
+              {item.suffix && <span className="text-[11px] text-zinc-600 ml-0.5">{item.suffix}</span>}
               {active && (
-                <span className="absolute left-2 right-2 -bottom-px h-0.5 rounded-full bg-amber-400" />
+                <span className="absolute left-0 right-0 -bottom-px h-[2px] rounded-t-sm bg-zinc-200" />
               )}
             </button>
           );
@@ -121,13 +191,11 @@ export const ProblemDashboard = ({ problem }: ProblemDashboardProps) => {
       <div className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-6 py-5">
         {activeTab === "Description" ? (
           <>
-            {/* Eyebrow / source */}
-            <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1.5 truncate">
-              {p.source}
-            </p>
-
-            {/* Title */}
-            <h1 className="text-xl font-semibold text-zinc-50 leading-snug mb-3">{p.title}</h1>
+            {/* Title Section */}
+            <h1 className="text-[19px] font-bold text-zinc-100 leading-snug mb-1">
+              {p.title} — {p.source}
+            </h1>
+            <h2 className="text-[17px] font-bold text-zinc-100 mb-4">Question</h2>
 
             {/* Meta row: difficulty, acceptance, tags */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-4">
@@ -136,8 +204,11 @@ export const ProblemDashboard = ({ problem }: ProblemDashboardProps) => {
               >
                 {p.difficulty}
               </span>
-              <span className="text-xs text-zinc-500">{p.acceptance}% accepted</span>
-              <span className="w-px h-4 bg-zinc-700 mx-1" />
+              <span className="text-[12.5px] text-zinc-500 flex items-center gap-2">
+                <FileText size={13} className="text-zinc-600" />
+                {p.source}
+              </span>
+              <span className="w-px h-4 bg-zinc-800 mx-1" />
               {p.tags.map((tag) => (
                 <span
                   key={tag}
@@ -149,36 +220,36 @@ export const ProblemDashboard = ({ problem }: ProblemDashboardProps) => {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-4 mb-6 pb-5 border-b border-zinc-800 text-[13px] text-zinc-400">
+            <div className="flex items-center gap-6 mb-8 pb-6 border-b border-zinc-800/80 text-[14.5px] text-zinc-400">
               <button
                 onClick={() => setSaved((s) => !s)}
-                className={`flex items-center gap-1.5 hover:text-zinc-100 transition-colors ${
+                className={`flex items-center gap-2 hover:text-zinc-100 transition-colors ${
                   saved ? "text-amber-400" : ""
                 }`}
               >
-                <Bookmark size={14} fill={saved ? "currentColor" : "none"} />
+                <Bookmark size={16} fill={saved ? "currentColor" : "none"} />
                 Save
               </button>
-              <button className="flex items-center gap-1.5 hover:text-zinc-100 transition-colors">
-                <ImageIcon size={14} />
+              <button className="flex items-center gap-2 hover:text-zinc-100 transition-colors">
+                <ImageIcon size={16} />
                 Images
               </button>
-              <button className="flex items-center gap-1.5 hover:text-zinc-100 transition-colors">
-                <Flag size={14} />
+              <button className="flex items-center gap-2 hover:text-zinc-100 transition-colors">
+                <Flag size={16} />
                 Report
               </button>
             </div>
 
             {/* Description */}
-            <p className="text-[13.5px] leading-[1.75] text-zinc-300 mb-6">{p.description}</p>
+            <p className="text-[14.5px] leading-[2] text-zinc-300 mb-8">{p.description}</p>
 
             {/* Input format */}
-            <section className="mb-6">
-              <h2 className="text-[13px] font-semibold text-zinc-50 mb-2.5">Input format</h2>
-              <ul className="space-y-2">
+            <section className="mb-8">
+              <h2 className="text-[14px] font-semibold text-zinc-50 mb-3">Input format</h2>
+              <ul className="space-y-3">
                 {p.inputFormat.map((line, i) => (
-                  <li key={i} className="flex gap-2.5 text-[13.5px] text-zinc-300 leading-[1.65]">
-                    <span className="text-zinc-600 select-none leading-[1.65]">•</span>
+                  <li key={i} className="flex gap-3 text-[14.5px] text-zinc-300 leading-[1.8]">
+                    <span className="text-zinc-600 select-none leading-[1.8]">•</span>
                     <span>{line}</span>
                   </li>
                 ))}
@@ -186,15 +257,15 @@ export const ProblemDashboard = ({ problem }: ProblemDashboardProps) => {
             </section>
 
             {/* Output format */}
-            <section className="mb-6">
-              <h2 className="text-[13px] font-semibold text-zinc-50 mb-2.5">Output format</h2>
-              <p className="text-[13.5px] text-zinc-300 leading-[1.65]">{p.outputFormat}</p>
+            <section className="mb-8">
+              <h2 className="text-[14px] font-semibold text-zinc-50 mb-3">Output format</h2>
+              <p className="text-[14.5px] text-zinc-300 leading-[1.8]">{p.outputFormat}</p>
             </section>
 
             {/* Constraints */}
-            <section className="mb-6 pb-6 border-b border-zinc-800">
-              <h2 className="text-[13px] font-semibold text-zinc-50 mb-2.5">Constraints</h2>
-              <div className="rounded-md border border-zinc-700 bg-zinc-950 px-4 py-3 flex flex-col gap-1.5 font-mono text-[13px] text-zinc-400">
+            <section className="mb-8 pb-8 border-b border-zinc-800/80">
+              <h2 className="text-[14px] font-semibold text-zinc-50 mb-3">Constraints</h2>
+              <div className="rounded-md border border-zinc-700/80 bg-zinc-950/50 px-5 py-4 flex flex-col gap-2 font-mono text-[14px] text-zinc-400">
                 {p.constraints.map((c, i) => (
                   <span key={i}>{c}</span>
                 ))}
@@ -245,6 +316,30 @@ export const ProblemDashboard = ({ problem }: ProblemDashboardProps) => {
               </section>
             ))}
           </>
+        ) : activeTab === "Solution" ? (
+          <div className="flex flex-col h-full">
+            <h2 className="text-[15px] font-semibold text-zinc-50 mb-1.5">Solution</h2>
+            <p className="text-[13px] text-zinc-400 mb-4 leading-relaxed">
+              Below is the C++ solution using Topological Sort with a min-heap to ensure the lexicographically smallest arrangement.
+            </p>
+            <div className="relative flex-1 min-h-0 flex flex-col rounded-md border border-zinc-700 bg-zinc-950 shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800 bg-[#121214] shrink-0">
+                <span className="text-[12px] font-medium text-zinc-400">C++</span>
+                <button
+                  onClick={() => copySample(solutionCode, 999)}
+                  className="p-1 rounded text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
+                  aria-label="Copy solution"
+                >
+                  {copiedIndex === 999 ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto">
+                <pre className="text-[13px] font-mono text-zinc-300 px-4 py-4 whitespace-pre leading-relaxed">
+{solutionCode}
+                </pre>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full py-24 text-center">
             <p className="text-sm text-zinc-500">

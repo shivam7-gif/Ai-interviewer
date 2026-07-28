@@ -33,7 +33,7 @@ const SESSION_PROBLEM = {
 
 function TranscriptPanel({ projectId, user }: { projectId: string; user: ReturnType<typeof useAuth>["user"] }) {
   return (
-    <div style={s.leftPanel}>
+    <div style={s.transcriptPanel}>
       <div style={s.transcriptArea}>
         <AIInterviewer projectId={projectId} user={user} />
       </div>
@@ -52,7 +52,7 @@ function ProblemPanel() {
 
 function EditorPanel({ onRun }: { onRun: () => void }) {
   const editorRef = useRef(null);
-  const [language, setLanguage] = useState("javascript");
+  const [language, setLanguage] = useState("cpp");
 
   function handleMount(editor: unknown) {
     editorRef.current = editor as typeof editorRef.current;
@@ -60,18 +60,36 @@ function EditorPanel({ onRun }: { onRun: () => void }) {
 
   return (
     <div style={s.centerPanel}>
-      <div style={s.editorBar}>
-        <ChangeLang onChange={(lang) => setLanguage(lang.toLowerCase())} />
-        <div style={{ flex: 1 }} />
-        <button className="btn btn-ghost" onClick={onRun} id="run-btn">
-          Run
-        </button>
-        <button className="btn btn-primary" id="submit-btn">
-          Submit
-        </button>
+      <div style={s.editorTopBar}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '13px', color: '#71717a' }}>Language</span>
+          <ChangeLang onChange={(lang) => setLanguage(lang.toLowerCase())} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: '#a1a1aa', fontSize: '13px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: '#f87171' }}>
+            <span></span> Report
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+            <span></span> AI Helper
+          </div>
+          <div style={{ cursor: 'pointer' }}>⚙️</div>
+        </div>
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <Ide onMount={handleMount} language={language} />
+      </div>
+      <div style={s.editorBottomBar}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}>
+          <span>^</span> Test Results
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button style={s.runBtn} onClick={onRun} id="run-btn">
+            ▶ Run Code
+          </button>
+          <button style={s.submitBtn} id="submit-btn">
+            Submit
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -153,10 +171,10 @@ const s: Record<string, React.CSSProperties> = {
 
   workspace: { flex: 1, display: "flex", overflow: "hidden", minHeight: 0 },
 
-  leftPanel: {
+  transcriptPanel: {
     width: "280px",
     flexShrink: 0,
-    borderRight: "1px solid var(--border)",
+    borderRight: "1px solid #27272a",
     display: "flex",
     flexDirection: "column",
     background: "var(--surface)",
@@ -170,34 +188,65 @@ const s: Record<string, React.CSSProperties> = {
     display: "flex",
     flexDirection: "column",
   },
-
+  rightPanel: {
+    width: "clamp(320px, 35vw, 550px)",
+    flexShrink: 0,
+    borderLeft: "1px solid #27272a",
+    display: "flex",
+    flexDirection: "column",
+    background: "var(--surface)",
+    overflow: "hidden",
+    minHeight: 0,
+  },
   centerPanel: {
     flex: 1,
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
     minHeight: 0,
-    borderRight: "1px solid var(--border)",
   },
-  editorBar: {
+  editorTopBar: {
     display: "flex",
     alignItems: "center",
-    gap: "8px",
-    padding: "0 12px",
-    height: "44px",
-    borderBottom: "1px solid var(--border)",
-    background: "var(--surface)",
+    justifyContent: "space-between",
+    padding: "0 16px",
+    height: "48px",
+    borderBottom: "1px solid #27272a",
+    background: "#09090b",
     flexShrink: 0,
   },
-
-  rightPanel: {
-    flex: "0 0 clamp(440px, 40vw, 580px)",
-    width: "clamp(440px, 40vw, 580px)",
-    flexShrink: 0,
+  editorBottomBar: {
     display: "flex",
-    flexDirection: "column",
-    background: "var(--surface)",
-    overflow: "hidden",
-    minHeight: 0,
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "0 16px",
+    height: "52px",
+    borderTop: "1px solid #27272a",
+    background: "#09090b",
+    flexShrink: 0,
+    color: "#e4e4e7"
+  },
+  runBtn: {
+    background: "transparent",
+    border: "1px solid #eab308",
+    color: "#eab308",
+    padding: "6px 14px",
+    borderRadius: "6px",
+    fontSize: "13px",
+    fontWeight: 500,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px"
+  },
+  submitBtn: {
+    background: "#16a34a",
+    border: "none",
+    color: "#fff",
+    padding: "7px 20px",
+    borderRadius: "6px",
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer"
   },
 };
