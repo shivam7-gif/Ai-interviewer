@@ -4,6 +4,7 @@ import { toast, Toaster } from "sonner";
 import axios from "axios";
 import { AppLayout } from "../components/layout/AppLayout";
 import { BACKEND_URL } from "../lib/config";
+import { MetamaskConnect } from "../components/wallet/Metamask";
 // ── Source types ──────────────────────────────────────────────────────────────
 
 type Source = "github" | "questionbank" | "custom";
@@ -237,6 +238,7 @@ export const Dashboard = () => {
             <h1 style={s.heading}>Create Interview</h1>
             <p style={s.sub}>Generate technical interviews from multiple sources.</p>
           </div>
+          <MetamaskConnect />
         </div>
 
         <div style={s.workspace}>
@@ -270,7 +272,7 @@ export const Dashboard = () => {
 
 const s: Record<string, React.CSSProperties> = {
   page:      { padding: "32px 32px", maxWidth: "1100px", margin: "0 auto", width: "100%" },
-  header:    { marginBottom: "28px" },
+  header:    { marginBottom: "28px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" },
   heading:   { fontSize: "18px", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: "4px" },
   sub:       { fontSize: "13px", color: "var(--text-muted)" },
   workspace: { display: "flex", gap: "0", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden", background: "var(--surface)" },
