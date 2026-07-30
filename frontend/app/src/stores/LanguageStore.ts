@@ -11,7 +11,7 @@ interface LanguageState {
 }
 
 export const useLanguageStore = create<LanguageState>()((set, get) => ({
-  language: { name: "JavaScript" },
+  language: { name: "C++" },
 
   setLanguage: (lang) =>
     set({ language: typeof lang === "string" ? { name: lang } : lang }),

@@ -1,10 +1,10 @@
 import { Routes, Route } from "react-router-dom";
-import { Project } from "./pages/Project";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Dashboard } from "./pages/Dashboard";
 import { LoginPage } from "./pages/Login";
 import { LandingPage } from "./pages/LandingPage";
 import { AppLayout } from "./components/layout/AppLayout";
+import { InterviewPage } from "./features/interview/InterviewPage";
 
 // Placeholder for routes not yet built
 const Placeholder = ({ title }: { title: string }) => (
@@ -52,7 +52,8 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/project/:projectId" element={<Project />} />
+      {/* New full-featured interview page */}
+      <Route path="/project/:projectId" element={<InterviewPage />} />
     </Routes>
   );
 }
