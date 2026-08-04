@@ -66,66 +66,7 @@ const DIFFICULTY_STYLES: Record<string, string> = {
   Hard: "text-rose-400 border-rose-800 bg-rose-950",
 };
 
-const solutionCode = `#include <bits/stdc++.h>
-using namespace std;
-
-vector<int> Solution(int N, int M, vector<pair<int,int>>& edges){
-    vector<vector<int>> adj(N+1);
-    for(auto &e :edges){
-        int u = e.first;
-        int v = e.second;
-        adj[u].push_back(v);
-    }
-    vector<int> indegree(N+1,0);
-    for(auto &e : edges){
-        indegree[e.second]++;
-    }
-    // instead of queue we will use min heap for lex smallest top sort
-    priority_queue<int,vector<int>,greater<int>>pq;
-    for(int i =1;i <=N;i++){
-        if(indegree[i]==0){
-            pq.push(i);
-        }
-    }
-    vector<int> ans;
-    while(!pq.empty()){
-        int u = pq.top();
-        pq.pop();
-        ans.push_back(u);
-        for(int v : adj[u]){
-            indegree[v]--;
-            if(indegree[v] == 0){
-                pq.push(v);
-            }
-        }
-    }
-    if(ans.size()!=N){
-        return {-1};
-    }
-    return ans;
-}
-
-int main(){
-    int T;
-    scanf("%d",&T);
-    while(T--){
-        int N,M;
-        scanf("%d %d",&N,&M);
-        vector<pair<int,int>> edges(M);
-        for(int i=0;i<M;i++){
-            int a,b;
-            scanf("%d %d",&a,&b);
-            edges[i]=make_pair(a,b);
-        }
-        vector<int> result = Solution(N,M,edges);
-        for(size_t i=0;i<result.size();i++){
-            printf("%d", result[i]);
-            if(i+1<result.size()) printf(" ");
-        }
-        printf("\\n");
-    }
-    return 0;
-}`;
+const solutionCode = "";
 
 // ---------- Component ----------
 

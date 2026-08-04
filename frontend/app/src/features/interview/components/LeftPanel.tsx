@@ -37,12 +37,12 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
         </div>
 
         {/* Chat transcript */}
-        <div className="chat-area">
+        {/* <div className="chat-area">
           {messages.map((msg) => (
             <ChatBubble key={msg.id} message={msg} />
           ))}
           <div ref={chatBottomRef} />
-        </div>
+        </div> */}
 
         {/* Voice status */}
         <VoiceStatus state={voiceState} />
