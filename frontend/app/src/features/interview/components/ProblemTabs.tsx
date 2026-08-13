@@ -22,7 +22,7 @@ const DIFFICULTY_CLASSES: Record<string, string> = {
   Hard: "difficulty-hard",
 };
 
-const TABS: { id: TabId; icon: React.ElementType; suffix?: string }[] = [
+const TABS: { id: TabId; icon: React.ComponentType<{ size?: number; className?: string }>; suffix?: string }[] = [
   { id: "Description", icon: FileText },
   { id: "Solution", icon: Star },
   { id: "Editorial", icon: BookOpen, suffix: "3" },

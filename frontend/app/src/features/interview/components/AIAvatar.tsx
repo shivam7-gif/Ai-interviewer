@@ -1,53 +1,40 @@
-import React, { useEffect, useState, useRef } from "react";
-
-/* ── Animated rings around the avatar ─────────────────────────── */
-const Ring: React.FC<{ size: number; delay: string; opacity: number }> = ({
-  size,
-  delay,
-  opacity,
-}) => (
-  <div
-    style={{
-      position: "absolute",
-      width: size,
-      height: size,
-      borderRadius: "50%",
-      border: `1px solid rgba(250, 204, 21, ${opacity})`,
-      animation: `avatarPulse 2.4s ease-in-out ${delay} infinite`,
-    }}
-  />
-);
-
-/* ── Waveform bars ─────────────────────────────────────────────── */
-const WaveBar: React.FC<{ delay: string; height: string }> = ({ delay, height }) => (
-  <div
-    style={{
-      width: 3,
-      height,
-      borderRadius: 99,
-      background: "rgba(250, 204, 21, 0.8)",
-      animation: `waveAnim 1s ease-in-out ${delay} infinite alternate`,
-    }}
-  />
-);
+import React from "react";
 
 interface AIAvatarProps {
   speaking?: boolean;
 }
 
 export const AIAvatar: React.FC<AIAvatarProps> = ({ speaking = false }) => {
-  const [tick, setTick] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    timerRef.current = setInterval(() => setTick((t) => t + 1), 100);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
   return (
-    <div className="ai-avatar-container">
+    <div className="ai-avatar-container" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", minHeight: "160px" }}>
+      <div
+        style={{
+          width: 80,
+          height: 80,
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "28px",
+          boxShadow: speaking ? "0 0 24px rgba(139, 92, 246, 0.6)" : "0 4px 12px rgba(0, 0, 0, 0.4)",
+          transition: "box-shadow 0.3s ease",
+        }}
+      >
+        🎙️
+      </div>
+      {speaking && (
+        <div
+          style={{
+            position: "absolute",
+            width: 100,
+            height: 100,
+            borderRadius: "50%",
+            border: "2px solid rgba(139, 92, 246, 0.4)",
+            animation: "pulse 1.5s infinite ease-out",
+          }}
+        />
+      )}
     </div>
   );
 };

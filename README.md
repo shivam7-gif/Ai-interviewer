@@ -81,8 +81,26 @@ Think: "*An AI interviewer that actually read your résumé*."
 - [LiveKit Cloud](https://livekit.io/) account (free tier works)
 - Google Cloud OAuth credentials
 
-### 1. Clone & Install
+### 🐳 Option A: 1-Command Docker Setup (Recommended)
 
+```bash
+# 1. Copy root environment template
+cp .env.example .env
+
+# 2. Start PostgreSQL, Backend, and Frontend in Docker
+npm run docker:up
+
+# 3. Apply database migrations
+docker compose exec backend npx prisma migrate deploy
+```
+
+Visit **http://localhost** 🎉
+
+---
+
+### 💻 Option B: Local Node.js Development
+
+#### 1. Clone & Install
 ```bash
 git clone https://github.com/yourusername/interviewos-ai.git
 cd interviewos-ai
@@ -94,66 +112,34 @@ cd backend && npm install
 cd ../frontend/app && npm install
 ```
 
-### 2. Configure Environment Variables
-
-**Backend:**
+#### 2. Configure Environment Variables
 ```bash
-cd backend
-cp .env.example .env
-# Edit .env with your values
+# Backend (.env)
+cd backend && cp .env.example .env
+
+# Frontend (.env)
+cd ../frontend/app && cp .env.example .env
 ```
 
-```env
-PORT=3001
-DATABASE_URL="postgresql://postgres:password@localhost:5432/interviewos"
-LIVEKIT_URL=wss://your-app.livekit.cloud
-LIVEKIT_API_KEY=your_api_key
-LIVEKIT_API_SECRET=your_api_secret
-CORS_ORIGIN=http://localhost:5173
-```
-
-**Frontend:**
+#### 3. Database Setup & Run
 ```bash
-cd frontend/app
-cp .env.example .env
-# Edit .env with your values
-```
-
-```env
-VITE_BACKEND_URL=http://localhost:3001
-VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
-```
-
-### 3. Set Up the Database
-
-```bash
-cd backend
-
-# Generate Prisma client
+# From workspace root:
 npm run db:generate
-
-# Run migrations
 npm run db:migrate
 
-# (Optional) Seed playlist data
-npm run db:seed
-```
-
-### 4. Run the Application
-
-Open two terminals:
-
-```bash
-# Terminal 1 – Backend
-cd backend
-npm run dev
-
-# Terminal 2 – Frontend
-cd frontend/app
-npm run dev
+# Start Backend & Frontend concurrently:
+npm run dev:backend   # in terminal 1
+npm run dev:frontend  # in terminal 2
 ```
 
 Visit **http://localhost:5173** 🎉
+
+---
+
+## 🚀 Production Deployment
+
+For complete multi-cloud deployment blueprints (Render, Railway, Neon Postgres, Vercel, Docker Swarm / VPS), see the **[Production Deployment Guide (DEPLOYMENT.md)](./DEPLOYMENT.md)**.
+
 
 ---
 

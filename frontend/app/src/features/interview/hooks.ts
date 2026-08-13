@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import type { VoiceState } from "../types";
+import axios from "axios";
+import { BACKEND_URL } from "../../lib/config";
+import type { VoiceState } from "./types";
 
 const AI_MESSAGES = [
   "Hello! I'm Sarah, your AI interviewer for today. Let's start with the \"Breakfast\" problem — a classic topological sort question. Are you familiar with topological sort?",
@@ -29,19 +31,60 @@ export function useVoiceStatus() {
   return voiceState;
 }
 
-export function useChatMessages() {
+export function useChatMessages(projectId?: string) {
   const [messages, setMessages] = useState([
-    { id: "1", role: "ai" as const, text: AI_MESSAGES[0], timestamp: new Date(Date.now() - 120000) },
+    { id: "1", role: "ai" as const, text: AI_MESSAGES[0] ?? "", timestamp: new Date(Date.now() - 120000) },
     { id: "2", role: "user" as const, text: "Yes, I think we can use a min-heap to get the lexicographically smallest topological order.", timestamp: new Date(Date.now() - 90000) },
-    { id: "3", role: "ai" as const, text: AI_MESSAGES[1], timestamp: new Date(Date.now() - 60000) },
+    { id: "3", role: "ai" as const, text: AI_MESSAGES[1] ?? "", timestamp: new Date(Date.now() - 60000) },
     { id: "4", role: "user" as const, text: "It should be O((N + M) log N) because each push/pop into the priority queue takes log N time and we do it for every node and edge.", timestamp: new Date(Date.now() - 30000) },
   ]);
+  const [isSending, setIsSending] = useState(false);
 
-  const addMessage = useCallback((role: "ai" | "user", text: string) => {
-    setMessages(prev => [...prev, { id: Date.now().toString(), role, text, timestamp: new Date() }]);
-  }, []);
+  const addMessage = useCallback(
+    async (role: "ai" | "user", text: string) => {
+      const userMsgId = Date.now().toString();
+      setMessages((prev) => [...prev, { id: userMsgId, role, text, timestamp: new Date() }]);
 
-  return { messages, addMessage };
+      if (role === "user" && projectId) {
+        setIsSending(true);
+        try {
+          const res = await axios.post(`${BACKEND_URL}/api/v1/interview/${projectId}/chat`, {
+            message: text,
+          });
+
+          if (res.data?.success && res.data?.data?.reply) {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: (Date.now() + 1).toString(),
+                role: "ai",
+                text: res.data.data.reply,
+                timestamp: new Date(),
+              },
+            ]);
+          }
+        } catch {
+          // Graceful fallback if backend/AI is offline
+          setTimeout(() => {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: (Date.now() + 1).toString(),
+                role: "ai",
+                text: "Thanks for explaining. Let's move on to the actual implementation. Can you start drafting your code in the editor?",
+                timestamp: new Date(),
+              },
+            ]);
+          }, 1500);
+        } finally {
+          setIsSending(false);
+        }
+      }
+    },
+    [projectId]
+  );
+
+  return { messages, addMessage, isSending };
 }
 
 export function useCamera() {

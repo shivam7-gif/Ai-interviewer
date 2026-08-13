@@ -4,7 +4,6 @@ import {
   XCircle,
   Clock,
   Cpu,
-  ChevronRight,
   ChevronUp,
   ChevronDown,
   Terminal,
@@ -45,7 +44,7 @@ interface TestResultsProps {
   onToggle?: () => void;
 }
 
-const TAB_ICONS: Record<TestTabId, React.ElementType> = {
+const TAB_ICONS: Record<TestTabId, React.ComponentType<{ size?: number; className?: string }>> = {
   "Test Results": FlaskConical,
   Console: Terminal,
   Output: FileOutput,

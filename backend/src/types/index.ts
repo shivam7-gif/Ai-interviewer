@@ -8,6 +8,20 @@ export const preInterviewBodySchema = z.object({
 
 export type PreInterviewBody = z.infer<typeof preInterviewBodySchema>;
 
+export const sendInterviewMessageSchema = z.object({
+  message: z.string().min(1, "Message cannot be empty"),
+});
+
+export type SendInterviewMessageBody = z.infer<typeof sendInterviewMessageSchema>;
+
+export const evaluateCodeBodySchema = z.object({
+  code: z.string().min(1, "Code cannot be empty"),
+  language: z.string().default("cpp"),
+  problemTitle: z.string().default("Algorithmic Assessment"),
+});
+
+export type EvaluateCodeBody = z.infer<typeof evaluateCodeBodySchema>;
+
 // ── GitHub API types ──────────────────────────────────────────────────────────
 
 export interface GitHubRepo {

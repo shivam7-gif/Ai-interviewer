@@ -31,7 +31,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ sessionId: _ }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof monaco | null>(null);
 
-  const getInitialCode = () => {
+  const getInitialCode = (): string => {
+    return localStorage.getItem(STORAGE_KEY) ?? INITIAL_CODE[LANG_TO_MONACO[language.name] ?? "cpp"] ?? INITIAL_CODE.cpp;
   };
 
   const [code, setCode] = useState(getInitialCode);

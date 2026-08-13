@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from "react";
 import { AIAvatar } from "./AIAvatar";
-import { ChatBubble } from "./ChatBubble";
 import { VoiceStatus } from "./VoiceStatus";
 import { WebcamCard } from "./WebcamCard";
 import { useVoiceStatus, useChatMessages, useCamera } from "../hooks";

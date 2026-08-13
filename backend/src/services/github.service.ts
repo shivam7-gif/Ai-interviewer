@@ -17,7 +17,7 @@ export function extractGitHubUsername(url: string): string {
 
   // Handle SSH format: git@github.com:username/repo.git
   const sshMatch = trimmed.match(/^git@github\.com:([^/]+)/i);
-  if (sshMatch) {
+  if (sshMatch && sshMatch[1]) {
     return sshMatch[1].replace(/\.git$/i, "");
   }
 
@@ -32,12 +32,13 @@ export function extractGitHubUsername(url: string): string {
 
   // Split on "/" and take the first non-empty segment → that's the username
   const segments = pathname.split("/").filter(Boolean);
-  if (segments.length === 0) {
+  const firstSegment = segments[0];
+  if (!firstSegment) {
     throw new Error(`Could not extract GitHub username from URL: "${url}"`);
   }
 
   // The username is always the first path segment; strip any accidental .git suffix
-  const username = segments[0].replace(/\.git$/i, "");
+  const username = firstSegment.replace(/\.git$/i, "");
 
   if (!username) {
     throw new Error(`Could not extract GitHub username from URL: "${url}"`);

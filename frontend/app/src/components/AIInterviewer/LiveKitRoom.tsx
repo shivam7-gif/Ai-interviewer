@@ -16,7 +16,7 @@ const LiveKitRoom = ({ projectId, user }: Props) => {
     "connecting" | "connected" | "permission" | "error"
   >("connecting");
 
-  const [room, setRoom] = useState<Room | null>(null);
+  const [_room, setRoom] = useState<Room | null>(null);
 
   console.log("ProjectId:", projectId);
   console.log("User:", user);

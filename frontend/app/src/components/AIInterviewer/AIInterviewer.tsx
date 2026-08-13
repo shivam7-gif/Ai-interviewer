@@ -1,7 +1,6 @@
-import React, { Suspense, useEffect } from 'react';
+import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { useGLTF, Environment, useAnimations, OrbitControls, Center, Bounds } from '@react-three/drei';
-import interviewerModelUrl from '../../assets/3dModels/interviewer.glb?url';
+import { OrbitControls, Center, Bounds } from '@react-three/drei';
 
 interface AIInterviewerProps {
   projectId: string;
@@ -12,16 +11,6 @@ interface AIInterviewerProps {
 }
 
 function Interviewer3DModel() {
-  // Commenting out the GLB load to test WebGL context crash
-  // const { scene, animations } = useGLTF(interviewerModelUrl);
-  // const { actions, names } = useAnimations(animations, scene);
-  // useEffect(() => {
-  //   if (names.length > 0) {
-  //     actions[names[0]]?.reset().fadeIn(0.5).play();
-  //   }
-  // }, [actions, names]);
-  // return <primitive object={scene} />;
-
   return (
     <mesh>
       <boxGeometry args={[1, 1, 1]} />
@@ -30,10 +19,7 @@ function Interviewer3DModel() {
   );
 }
 
-// Preload the model
-// useGLTF.preload(interviewerModelUrl);
-
-export function AIInterviewer({ projectId, user }: AIInterviewerProps) {
+export function AIInterviewer({ projectId: _projectId, user }: AIInterviewerProps) {
   if (!user) {
     return (
       <div className="flex flex-1 items-center justify-center p-4 text-sm text-neutral-500">
@@ -55,7 +41,6 @@ export function AIInterviewer({ projectId, user }: AIInterviewerProps) {
           <Canvas camera={{ position: [0, 0, 4], fov: 45 }}>
             <ambientLight intensity={0.8} />
             <directionalLight position={[5, 10, 5]} intensity={1.5} />
-            {/* <Environment preset="city" /> */}
             <Bounds fit clip margin={1.5}>
               <Center>
                 <Interviewer3DModel />

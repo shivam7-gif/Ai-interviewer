@@ -1,0 +1,90 @@
+name: CI - Lint, Type Check & Build
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  validate-and-build:
+    name: Build & Validate Workspaces
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: interviewos_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/app/package-lock.json
+
+      # ── Backend Validation ──────────────────────────────────────────────────
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Generate Prisma Client
+        working-directory: ./backend
+        run: npx prisma generate
+
+      - name: Type Check Backend
+        working-directory: ./backend
+        run: npm run lint
+
+      - name: Build Backend
+        working-directory: ./backend
+        run: npm run build
+
+      # ── Frontend Validation ─────────────────────────────────────────────────
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend/app
+        run: npm ci
+
+      - name: Type Check Frontend
+        working-directory: ./frontend/app
+        run: npm run type-check
+
+      - name: Build Frontend
+        working-directory: ./frontend/app
+        run: npm run build
+
+      # ── Docker Image Build Tests ────────────────────────────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: interviewos-backend:test
+
+      - name: Build Frontend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend/app
+          file: ./frontend/app/Dockerfile
+          push: false
+          tags: interviewos-frontend:test

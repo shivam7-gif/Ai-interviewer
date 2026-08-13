@@ -1,10 +1,10 @@
 import React from "react";
-import { Mic, MicOff, Activity, Brain, Volume2, Radio } from "lucide-react";
+import { Mic, Activity, Brain, Volume2, Radio } from "lucide-react";
 import type { VoiceState } from "../types";
 
 const STATE_CONFIG: Record<
   VoiceState,
-  { label: string; icon: React.ElementType; color: string; dot: string }
+  { label: string; icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>; color: string; dot: string }
 > = {
   idle: {
     label: "Idle",

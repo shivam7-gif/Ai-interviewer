@@ -52,13 +52,19 @@ const defaultProblem: ProblemDashboardProps["problem"] = {
   ],
 };
 
-const NAV_ITEMS = [
+interface NavItem {
+  id: "Description" | "Solution" | "Editorial" | "Discussions" | "Submissions";
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  suffix?: string;
+}
+
+const NAV_ITEMS: NavItem[] = [
   { id: "Description", icon: FileText },
   { id: "Solution", icon: Star },
   { id: "Editorial", icon: BookOpen, suffix: "3/3" },
   { id: "Discussions", icon: MessageSquare },
   { id: "Submissions", icon: History },
-] as const;
+];
 
 const DIFFICULTY_STYLES: Record<string, string> = {
   Easy: "text-emerald-400 border-emerald-800 bg-emerald-950",

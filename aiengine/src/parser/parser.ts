@@ -1,5 +1,5 @@
-import { interviewSchema } from "../types/InterviewResponse";
-import type { InterviewResponse } from "../types/InterviewResponse";
+import { interviewSchema } from "../types/InterviewResponse.js";
+import type { InterviewResponse } from "../types/InterviewResponse.js";
 
 export function parseInterviewResponse(
     response: string

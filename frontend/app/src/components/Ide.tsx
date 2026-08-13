@@ -4,6 +4,7 @@ import { useMonacoLanguage } from "../stores/LanguageStore";
 interface IdeProps {
   onMount?: (editor: any, monaco: any) => void;
   defaultValue?: string;
+  language?: string;
 }
 
 export const Ide = ({

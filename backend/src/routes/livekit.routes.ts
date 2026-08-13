@@ -1,6 +1,7 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import { generateLiveKitToken } from "../services/livekit.service.js";
+import { authLimiter } from "../middleware/rateLimiter.js";
 
 const router = Router();
 
@@ -8,7 +9,7 @@ const router = Router();
  * POST /api/livekit/token
  * Generates a signed LiveKit access token for a participant.
  */
-router.post("/token", async (req: Request, res: Response) => {
+router.post("/token", authLimiter, async (req: Request, res: Response) => {
   const { roomName, identity } = req.body;
 
   if (!identity) {

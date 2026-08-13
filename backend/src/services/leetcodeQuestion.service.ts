@@ -1,14 +1,14 @@
 import axios from "axios";
 
 export const leetCodeQuestionService =async (companyName: string[])=>{
-    const companyNameMap ={
+    const companyNameMap: Record<string, string> = {
         "google": "google",
         "amazon": "amazon",
         "microsoft": "microsoft",
         "facebook": "facebook",
         "apple": "apple",
         "tesla": "tesla",
-    }
+    };
     let url=``
     companyName.forEach(company => {
         const mappedCompanyName = companyNameMap[company];
