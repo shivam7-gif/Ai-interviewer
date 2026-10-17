@@ -4,6 +4,8 @@
   "description": "InterviewOS AI – Scalable full-stack AI interview platform",
   "private": true,
   "scripts": {
+    "dev:codecoach": "npm --prefix codecoach run dev",
+    "build:codecoach": "npm --prefix codecoach run build",
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend/app run dev",
     "dev:ai": "npm --prefix aiengine run dev",

@@ -1,0 +1,28 @@
+Shivam Singh Rawat
+B.Tech in Information Technology, GGSIPU (Aug 2025 - May 2029), CGPA 8.01 (First Year)
+Coursework: Data Structures & Algorithms, OOPS, DBMS, Operating Systems, Computer Networks, System Design
+
+Experience
+Open Source Contributor, AI/Agents Track - GirlScript Summer of Code 2026 (Apr 2026 - Present)
+- Contributed 10+ merged pull requests to a multi-contributor AI agent codebase, working with maintainers on code review and integration.
+- Improved API contract consistency and raised unit test coverage by 30%, reducing integration defects in downstream agent pipelines.
+
+Projects
+StackPilot AI - Agentic Code Generation Platform (Dec 2025 - Present)
+Stack: LangGraph, LangChain, RAG, FastAPI, Next.js, Neo4j, Pinecone, Redis, MySQL, Docker, AWS ECS, GitHub Actions
+- Architected a 6-agent LangGraph orchestration system (Planner, Architect, Coder, Tester, DevOps, Reviewer) converting feature requests into tested, CI/CD-deployed code.
+- Built a RAG memory layer with Neo4j and Pinecone, letting agents retrieve prior architectural decisions in under 120ms and cutting redundant LLM API calls by about 40%.
+- Deployed microservices on AWS ECS with Docker and GitHub Actions CI/CD; built FastAPI endpoints with Redis caching achieving <50ms p95 latency.
+
+Alumni Connect - Full Stack Networking Platform (Aug 2025)
+Stack: React.js, Node.js, Express.js, MongoDB, MySQL, WebSockets, scikit-learn, JWT, REST API
+- Built a MERN platform with JWT auth, RBAC, and real-time WebSocket chat sustaining 200+ concurrent sessions via connection pooling and event-driven architecture.
+- Optimized MongoDB indexes and MySQL query plans, cutting average query latency from about 340ms to under 60ms (82% reduction) under simulated peak load.
+- Built a scikit-learn recommendation engine for mentor-student matching, achieving 87% relevance accuracy and surfacing top-5 matches in under 200ms.
+
+Skills
+Languages: C++, Python, TypeScript, JavaScript, Java, SQL
+Backend: Node.js, Express.js, FastAPI, REST API design, Microservices, Redis, JWT, RBAC
+Databases: MySQL, PostgreSQL, MongoDB, Neo4j, Redis, Vector Databases
+Cloud and DevOps: AWS (EC2, S3, ECS), Docker, Kubernetes, GitHub Actions, CI/CD, Linux, Git
+Achievements: LeetCode rating 1991, CodeChef 3-Star, SIH Internal Hackathon Winner 2026

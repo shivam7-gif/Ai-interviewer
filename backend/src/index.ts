@@ -12,6 +12,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
 import interviewRoutes from "./routes/interview.routes.js";
 import playlistRoutes from "./routes/playlist.routes.js";
+import questionRoutes from "./routes/question.routes.js";
 import liveKitRoutes from "./routes/livekit.routes.js";
 
 // ── App setup ─────────────────────────────────────────────────────────────────
@@ -27,7 +28,10 @@ app.use(
 
 app.use(
   cors({
-    origin: env.CORS_ORIGIN === "*" ? "*" : env.CORS_ORIGIN.split(",").map((s) => s.trim()),
+    origin:
+      env.CORS_ORIGIN === "*"
+        ? "*"
+        : env.CORS_ORIGIN.split(",").map((s) => s.trim()),
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: true,
@@ -77,6 +81,7 @@ app.get("/health/ready", async (_req, res) => {
 app.use("/api", apiLimiter);
 app.use("/api/v1", interviewRoutes);
 app.use("/api/playlists", playlistRoutes);
+app.use("/api/questions", questionRoutes);
 app.use("/api/livekit", liveKitRoutes);
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────

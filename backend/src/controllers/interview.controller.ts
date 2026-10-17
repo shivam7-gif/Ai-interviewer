@@ -38,7 +38,7 @@ export const createPreInterview = async (
     const username = extractGitHubUsername(gitHub);
     const repos = await fetchGitHubRepos(username);
 
-    const interview = await prisma.interView.create({
+    const interview = await prisma.interview.create({
       data: {
         metaData: {
           githubUrl: gitHub,
@@ -46,7 +46,9 @@ export const createPreInterview = async (
         },
         status: "Pre",
         score: 0,
-      },
+        candidate: { connect: { id: "00000000-0000-0000-0000-000000000000" } },
+        question: { connect: { id: "00000000-0000-0000-0000-000000000000" } },
+      } as any,
     });
 
     res.status(201).json({
@@ -71,10 +73,10 @@ export const getInterviewById = async (
   const id = req.params.id as string;
 
   try {
-    const interview = await prisma.interView.findUnique({
+    const interview = await prisma.interview.findUnique({
       where: { id },
       include: {
-        conversations: true,
+        messages: true,
       },
     });
 
@@ -115,9 +117,9 @@ export const sendInterviewMessage = async (
   const { message } = parsed.data;
 
   try {
-    const interview = await prisma.interView.findUnique({
+    const interview = await prisma.interview.findUnique({
       where: { id },
-      include: { conversations: true },
+      include: { messages: true },
     });
 
     if (!interview) {
@@ -134,8 +136,10 @@ export const sendInterviewMessage = async (
     });
 
     // Construct history for AI context
-    const history = interview.conversations.map((msg) => ({
-      role: (msg.type === "User" ? "user" : "assistant") as "user" | "assistant",
+    const history = (interview.messages ?? []).map((msg: any) => ({
+      role: (msg.type === "User" ? "user" : "assistant") as
+        | "user"
+        | "assistant",
       content: msg.message,
     }));
 
@@ -161,7 +165,7 @@ export const sendInterviewMessage = async (
         2
     );
 
-    await prisma.interView.update({
+    await prisma.interview.update({
       where: { id },
       data: {
         score: newScore,
@@ -208,7 +212,7 @@ export const evaluateCodeSubmission = async (
   const { code, language, problemTitle } = parsed.data;
 
   try {
-    const interview = await prisma.interView.findUnique({
+    const interview = await prisma.interview.findUnique({
       where: { id },
     });
 
@@ -216,7 +220,11 @@ export const evaluateCodeSubmission = async (
       throw new AppError("Interview session not found", 404);
     }
 
-    const evaluation = await AIService.evaluateCode(problemTitle, code, language);
+    const evaluation = await AIService.evaluateCode(
+      problemTitle,
+      code,
+      language
+    );
 
     res.status(200).json({
       success: true,
@@ -239,10 +247,10 @@ export const finishInterviewSession = async (
   const id = req.params.id as string;
 
   try {
-    const interview = await prisma.interView.update({
+    const interview = await prisma.interview.update({
       where: { id },
       data: { status: "Done" },
-      include: { conversations: true },
+      include: { messages: true },
     });
 
     res.status(200).json({

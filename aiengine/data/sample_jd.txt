@@ -1,0 +1,21 @@
+Backend Engineer Intern - AI Platform
+
+We are looking for a backend engineering intern to help build the services behind our AI-powered products.
+
+Responsibilities
+- Build and maintain REST APIs using Python (FastAPI) or Node.js
+- Work with PostgreSQL and Redis for data storage and caching
+- Integrate LLM APIs and help build retrieval-augmented generation (RAG) pipelines
+- Write unit tests and take part in code reviews
+- Deploy services using Docker and CI/CD pipelines
+
+Requirements
+- Strong fundamentals in data structures, algorithms, and operating systems
+- Experience building and debugging backend services
+- Familiarity with SQL databases and query optimization
+- Understanding of concurrency and API design
+- Good communication skills
+
+Nice to have
+- Experience with Kafka or message queues
+- Experience with cloud platforms (AWS)
