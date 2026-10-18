@@ -1,8 +1,8 @@
 import React from "react";
-import { Mic, MicOff, Video, VideoOff, Wifi, WifiOff } from "lucide-react";
+import { Mic, MicOff, Video, VideoOff } from "lucide-react";
 
 interface WebcamCardProps {
-  videoRef: React.RefObject<HTMLVideoElement | null>;
+  videoRef: React.Ref<HTMLVideoElement>;
   status: "loading" | "live" | "denied";
   label?: string;
   micMuted: boolean;
@@ -23,58 +23,54 @@ export const WebcamCard: React.FC<WebcamCardProps> = ({
   const isLive = status === "live";
 
   return (
-    <div className="webcam-card">
-      {/* Header row */}
-      <div className="webcam-header">
-        <div className="webcam-label">
-          <span className="webcam-label-text">{label}</span>
-        </div>
-        <div
-          className={`webcam-status ${isLive ? "webcam-status-live" : "webcam-status-off"}`}
-        >
-          {isLive ? <Wifi size={11} /> : <WifiOff size={11} />}
-          <span>{isLive ? "Connected" : status === "loading" ? "Starting" : "No Camera"}</span>
-        </div>
+    <div className="candidate-tile">
+      {/* Tile header: Name + status */}
+      <div className="candidate-header">
+        <span className="candidate-name">{label}</span>
+        <span className="candidate-status-text">
+          {isLive && !camOff ? "Camera on" : status === "denied" ? "Denied" : "Camera off"}
+        </span>
       </div>
 
-      {/* Video preview */}
-      <div className="webcam-preview">
+      {/* Video display area */}
+      <div className="candidate-video-area">
         <video
           ref={videoRef}
           autoPlay
           muted
           playsInline
-          className={`webcam-video ${!camOff && isLive ? "webcam-video-visible" : "webcam-video-hidden"}`}
-          style={{ transform: "scaleX(-1)" }}
+          className={`candidate-video ${!camOff && isLive ? "video-visible" : "video-hidden"}`}
         />
 
-        {/* Overlay when camera is off or loading */}
+        {/* Fallback when camera is disabled or not granted */}
         {(camOff || !isLive) && (
-          <div className="webcam-overlay">
-            <div className="webcam-avatar-placeholder">
-              {label[0]?.toUpperCase() ?? "U"}
+          <div className="candidate-fallback">
+            <div className="candidate-avatar">
+              {(label[0] ?? "U").toUpperCase()}
             </div>
             {status === "denied" && (
-              <span className="webcam-denied-text">Camera access denied</span>
+              <span className="candidate-denied">Camera permission denied</span>
             )}
           </div>
         )}
 
-        {/* Control buttons overlay */}
-        <div className="webcam-controls">
+        {/* 32px Ghost icon control buttons with clear strikethrough icon state */}
+        <div className="candidate-controls">
           <button
             onClick={onToggleMic}
-            className={`webcam-ctrl-btn ${micMuted ? "webcam-ctrl-danger" : ""}`}
-            title={micMuted ? "Unmute" : "Mute"}
+            className={`ghost-ctrl-btn ${micMuted ? "ctrl-off" : "ctrl-on"}`}
+            aria-label={micMuted ? "Unmute microphone" : "Mute microphone"}
+            title={micMuted ? "Unmute microphone" : "Mute microphone"}
           >
-            {micMuted ? <MicOff size={14} /> : <Mic size={14} />}
+            {micMuted ? <MicOff size={15} /> : <Mic size={15} />}
           </button>
           <button
             onClick={onToggleCam}
-            className={`webcam-ctrl-btn ${camOff ? "webcam-ctrl-danger" : ""}`}
-            title={camOff ? "Enable camera" : "Disable camera"}
+            className={`ghost-ctrl-btn ${camOff ? "ctrl-off" : "ctrl-on"}`}
+            aria-label={camOff ? "Turn on camera" : "Turn off camera"}
+            title={camOff ? "Turn on camera" : "Turn off camera"}
           >
-            {camOff ? <VideoOff size={14} /> : <Video size={14} />}
+            {camOff ? <VideoOff size={15} /> : <Video size={15} />}
           </button>
         </div>
       </div>

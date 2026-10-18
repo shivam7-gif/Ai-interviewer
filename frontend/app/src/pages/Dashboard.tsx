@@ -7,7 +7,7 @@ import { BACKEND_URL } from "../lib/config";
 import { connectWallet } from "../components/wallet/Metamask";
 // ── Source types ──────────────────────────────────────────────────────────────
 
-type Source = "github" | "questionbank" | "custom";
+type Source = "github" | "codeforces" | "resume" | "questionbank" | "custom";
 
 const SOURCES: { id: Source; label: string; description: string }[] = [
   {
@@ -15,6 +15,18 @@ const SOURCES: { id: Source; label: string; description: string }[] = [
     label: "GitHub Repository",
     description:
       "Generate interview questions from a GitHub profile and project history.",
+  },
+  {
+    id: "codeforces",
+    label: "Codeforces Profile",
+    description:
+      "Analyze contest rating, strong topics, and low-solve-rate areas.",
+  },
+  {
+    id: "resume",
+    label: "Resume / CV",
+    description:
+      "Upload or paste your resume to tailor interview questions to your background.",
   },
   {
     id: "questionbank",
@@ -67,7 +79,7 @@ function GitHubPanel() {
       const res = await axios.post(`${BACKEND_URL}/api/v1/pre-interview`, {
         gitHub: url,
       });
-      navigate(`/project/${res.data.projectId}`);
+      navigate(`/project/${res.data.projectId}/check`);
     } catch {
       toast.error(
         "Failed to analyse repository. Please check the URL and try again."
@@ -157,6 +169,364 @@ function GitHubPanel() {
           onClick={() => connectWallet()}
         >
           Connect Wallet
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Codeforces Profile panel ──────────────────────────────────────────────────
+
+interface CodeforcesProfileData {
+  handle: string;
+  rating: number | null;
+  maxRating: number | null;
+  rank: string | null;
+  maxRank: string | null;
+  solvedRecent: number;
+  submissionsAnalysed: number;
+  strongTags: string[];
+  weakTags: string[];
+  fetchedAt: string;
+}
+
+function CodeforcesPanel() {
+  const navigate = useNavigate();
+  const [handle, setHandle] = useState("");
+  const [profile, setProfile] = useState<CodeforcesProfileData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [starting, setStarting] = useState(false);
+
+  async function handleAnalyze() {
+    if (!handle.trim()) {
+      toast.error("Please enter a Codeforces handle or profile URL");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `${BACKEND_URL}/api/v1/codeforces/${encodeURIComponent(handle.trim())}`
+      );
+      setProfile(res.data.profile);
+      toast.success(`Profile loaded for ${res.data.profile.handle}`);
+    } catch (err: any) {
+      toast.error(
+        err.response?.data?.error ?? "Failed to fetch Codeforces profile."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleStart() {
+    const targetHandle = profile ? profile.handle : handle.trim();
+    if (!targetHandle) {
+      toast.error("Please enter a Codeforces handle first");
+      return;
+    }
+    setStarting(true);
+    try {
+      const res = await axios.post(`${BACKEND_URL}/api/v1/pre-interview`, {
+        codeforcesHandle: targetHandle,
+      });
+      navigate(`/project/${res.data.projectId}/check`);
+    } catch {
+      toast.error("Failed to initialize interview. Please try again.");
+    } finally {
+      setStarting(false);
+    }
+  }
+
+  return (
+    <div style={s.panel}>
+      <div style={s.panelHeader}>
+        <p style={s.panelTitle}>Codeforces Profile</p>
+        <p style={s.panelDesc}>
+          Analyse contest ratings, submission history, and topic proficiencies to
+          generate targeted competitive programming questions.
+        </p>
+      </div>
+
+      <div style={s.form}>
+        <div className="field">
+          <label className="label">Codeforces Handle or Profile URL</label>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <input
+              className="input"
+              placeholder="e.g. tourist or https://codeforces.com/profile/tourist"
+              value={handle}
+              onChange={(e) => setHandle(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+              style={{ flex: 1 }}
+            />
+            <button
+              className="btn btn-secondary"
+              onClick={handleAnalyze}
+              disabled={loading}
+              type="button"
+            >
+              {loading ? "Analyzing..." : "Analyze"}
+            </button>
+          </div>
+        </div>
+
+        {profile && (
+          <div style={s.profileCard}>
+            <div style={s.profileHeader}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={s.profileHandle}>{profile.handle}</span>
+                <span style={s.profileRank}>{profile.rank ?? "unrated"}</span>
+              </div>
+              <div style={s.profileStats}>
+                <span>Rating: <strong>{profile.rating ?? "—"}</strong></span>
+                <span style={{ color: "var(--text-faint)" }}>•</span>
+                <span>Max: <strong>{profile.maxRating ?? "—"}</strong> ({profile.maxRank ?? "—"})</span>
+              </div>
+            </div>
+
+            <div style={s.profileRow}>
+              <div style={s.statBox}>
+                <span style={s.statValue}>{profile.solvedRecent}</span>
+                <span style={s.statLabel}>Solved problems (recent {profile.submissionsAnalysed} submissions)</span>
+              </div>
+            </div>
+
+            <div style={{ marginTop: "12px" }}>
+              <span style={s.tagHeader}>Strongest Topics:</span>
+              <div style={s.tagList}>
+                {profile.strongTags.length ? (
+                  profile.strongTags.map((tag) => (
+                    <span key={tag} style={s.strongTagBadge}>
+                      ✓ {tag}
+                    </span>
+                  ))
+                ) : (
+                  <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>None detected</span>
+                )}
+              </div>
+            </div>
+
+            <div style={{ marginTop: "10px" }}>
+              <span style={s.tagHeader}>Lowest Solve-Rate Topics (Targeted Questions):</span>
+              <div style={s.tagList}>
+                {profile.weakTags.length ? (
+                  profile.weakTags.map((tag) => (
+                    <span key={tag} style={s.weakTagBadge}>
+                      ⚠ {tag}
+                    </span>
+                  ))
+                ) : (
+                  <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>None detected</span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div style={s.info}>
+          <span style={{ color: "var(--text-faint)", fontSize: "11px" }}>⚠</span>
+          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+            Codeforces rate limit allows 1 call per 2 seconds. The analysis is cached for 10 minutes.
+          </span>
+        </div>
+      </div>
+
+      <div style={s.panelFooter}>
+        <button
+          className="btn btn-primary btn-lg"
+          onClick={handleStart}
+          disabled={starting}
+        >
+          {starting ? (
+            <>
+              <span className="spinner" />
+              Starting Assessment...
+            </>
+          ) : (
+            "Start Codeforces Assessment →"
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Resume Ingestion panel ────────────────────────────────────────────────────
+
+function ResumePanel() {
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<"upload" | "paste">("upload");
+  const [file, setFile] = useState<File | null>(null);
+  const [text, setText] = useState("");
+  const [words, setWords] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const [starting, setStarting] = useState(false);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+    if (!selected.name.toLowerCase().endsWith(".pdf")) {
+      toast.error("Please upload a PDF file.");
+      return;
+    }
+    setFile(selected);
+    await uploadResume(selected);
+  }
+
+  async function uploadResume(pdfFile: File) {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", pdfFile);
+
+    try {
+      let res;
+      try {
+        res = await axios.post(`${BACKEND_URL}/api/v1/ingest/resume`, formData);
+      } catch {
+        res = await axios.post("http://localhost:8000/ingest/resume", formData);
+      }
+
+      setText(res.data.text);
+      setWords(res.data.words ?? res.data.text.trim().split(/\s+/).length);
+      toast.success(`Resume ingested successfully (${res.data.words} words)!`);
+    } catch (err: any) {
+      toast.error(
+        err.response?.data?.detail ??
+        err.response?.data?.error ??
+        "Failed to extract resume text. You can paste your resume text directly."
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleStart() {
+    const activeText = text.trim();
+    if (!activeText) {
+      toast.error("Please upload a resume PDF or paste resume text first.");
+      return;
+    }
+    setStarting(true);
+    try {
+      const res = await axios.post(`${BACKEND_URL}/api/v1/pre-interview`, {
+        resumeText: activeText,
+        resumeWords: words || activeText.split(/\s+/).length,
+      });
+      navigate(`/project/${res.data.projectId}/check`);
+    } catch {
+      toast.error("Failed to start interview. Please try again.");
+    } finally {
+      setStarting(false);
+    }
+  }
+
+  return (
+    <div style={s.panel}>
+      <div style={s.panelHeader}>
+        <p style={s.panelTitle}>Resume / CV Ingestion</p>
+        <p style={s.panelDesc}>
+          Upload your PDF resume or paste text to generate bespoke technical interview
+          questions tailored to your project experience, stack, and skill gaps.
+        </p>
+      </div>
+
+      <div style={s.form}>
+        <div style={{ display: "flex", gap: "8px", marginBottom: "4px" }}>
+          <button
+            type="button"
+            style={{
+              ...s.platformBtn,
+              ...(tab === "upload" ? s.platformBtnActive : {}),
+            }}
+            onClick={() => setTab("upload")}
+          >
+            Upload PDF
+          </button>
+          <button
+            type="button"
+            style={{
+              ...s.platformBtn,
+              ...(tab === "paste" ? s.platformBtnActive : {}),
+            }}
+            onClick={() => setTab("paste")}
+          >
+            Paste Text
+          </button>
+        </div>
+
+        {tab === "upload" ? (
+          <div style={s.dropzone}>
+            <label style={s.dropzoneLabel}>
+              <span style={{ fontSize: "28px", marginBottom: "8px" }}>📄</span>
+              <span style={{ fontWeight: 500, color: "var(--text)", fontSize: "13px" }}>
+                {file ? file.name : "Click to select or drag & drop a PDF resume"}
+              </span>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px" }}>
+                Maximum 5 MB, up to 4 pages (text-based PDF)
+              </span>
+              <input
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+            </label>
+            {uploading && (
+              <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "var(--accent)" }}>
+                <span className="spinner" /> Ingesting & extracting text...
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="field">
+            <label className="label">Paste Resume Content</label>
+            <textarea
+              className="input"
+              rows={8}
+              placeholder="Paste the plain text of your resume here..."
+              value={text}
+              onChange={(e) => {
+                const val = e.target.value;
+                setText(val);
+                setWords(val.trim() ? val.trim().split(/\s+/).length : 0);
+              }}
+              style={{ fontFamily: "monospace", fontSize: "12px", lineHeight: "1.5", resize: "vertical" }}
+            />
+          </div>
+        )}
+
+        {text && (
+          <div style={s.resumePreview}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+              <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text)" }}>Extracted Content Preview</span>
+              <span style={{ fontSize: "11px", color: "var(--accent)", fontWeight: 500 }}>{words} words parsed</span>
+            </div>
+            <p style={s.previewSnippet}>{text.slice(0, 320)}...</p>
+          </div>
+        )}
+
+        <div style={s.info}>
+          <span style={{ color: "var(--text-faint)", fontSize: "11px" }}>ℹ</span>
+          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+            The AI engine extracts skills, tools, and project highlights to frame real-world situational questions.
+          </span>
+        </div>
+      </div>
+
+      <div style={s.panelFooter}>
+        <button
+          className="btn btn-primary btn-lg"
+          onClick={handleStart}
+          disabled={starting || !text}
+        >
+          {starting ? (
+            <>
+              <span className="spinner" />
+              Starting Interview...
+            </>
+          ) : (
+            "Start Resume-Based Interview →"
+          )}
         </button>
       </div>
     </div>
@@ -320,6 +690,8 @@ export const Dashboard = () => {
 
   const panelMap: Record<Source, React.ReactNode> = {
     github: <GitHubPanel />,
+    codeforces: <CodeforcesPanel />,
+    resume: <ResumePanel />,
     questionbank: <QuestionBankPanel />,
     custom: <CustomPanel />,
   };
@@ -504,5 +876,127 @@ const s: Record<string, React.CSSProperties> = {
     background: "var(--accent-faint)",
     borderColor: "var(--accent-border)",
     color: "var(--accent)",
+  },
+  profileCard: {
+    padding: "16px",
+    background: "var(--surface-2)",
+    borderRadius: "var(--radius)",
+    border: "1px solid var(--border)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
+  profileHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "8px",
+  },
+  profileHandle: {
+    fontSize: "15px",
+    fontWeight: 600,
+    color: "var(--text)",
+  },
+  profileRank: {
+    fontSize: "11px",
+    padding: "2px 8px",
+    borderRadius: "999px",
+    background: "var(--accent-faint)",
+    color: "var(--accent)",
+    fontWeight: 500,
+    textTransform: "capitalize",
+  },
+  profileStats: {
+    fontSize: "12px",
+    color: "var(--text-muted)",
+    display: "flex",
+    gap: "6px",
+    alignItems: "center",
+  },
+  profileRow: {
+    display: "flex",
+    gap: "12px",
+  },
+  statBox: {
+    padding: "8px 12px",
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
+    borderRadius: "var(--radius)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+    flex: 1,
+  },
+  statValue: {
+    fontSize: "14px",
+    fontWeight: 600,
+    color: "var(--text)",
+  },
+  statLabel: {
+    fontSize: "11px",
+    color: "var(--text-muted)",
+  },
+  tagHeader: {
+    fontSize: "11.5px",
+    fontWeight: 500,
+    color: "var(--text-muted)",
+    display: "block",
+    marginBottom: "4px",
+  },
+  tagList: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "6px",
+  },
+  strongTagBadge: {
+    fontSize: "11px",
+    padding: "2px 8px",
+    borderRadius: "4px",
+    background: "rgba(16, 185, 129, 0.12)",
+    border: "1px solid rgba(16, 185, 129, 0.3)",
+    color: "#10b981",
+    fontWeight: 500,
+  },
+  weakTagBadge: {
+    fontSize: "11px",
+    padding: "2px 8px",
+    borderRadius: "4px",
+    background: "rgba(245, 158, 11, 0.12)",
+    border: "1px solid rgba(245, 158, 11, 0.3)",
+    color: "#f59e0b",
+    fontWeight: 500,
+  },
+  dropzone: {
+    border: "2px dashed var(--border)",
+    borderRadius: "var(--radius)",
+    padding: "28px 16px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    background: "var(--surface-2)",
+  },
+  dropzoneLabel: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    cursor: "pointer",
+    width: "100%",
+  },
+  resumePreview: {
+    padding: "12px 14px",
+    background: "var(--surface-2)",
+    border: "1px solid var(--border)",
+    borderRadius: "var(--radius)",
+  },
+  previewSnippet: {
+    fontSize: "11.5px",
+    color: "var(--text-muted)",
+    lineHeight: 1.5,
+    margin: 0,
+    fontFamily: "monospace",
+    whiteSpace: "pre-wrap",
   },
 };

@@ -1,11 +1,12 @@
-import React from "react";
-import { Terminal } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Terminal, Sun, Moon } from "lucide-react";
 
 interface NavbarProps {
   sessionId?: string;
   userName?: string;
   userAvatar?: string;
   timeRemaining?: string;
+  isWarning?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -13,40 +14,61 @@ export const Navbar: React.FC<NavbarProps> = ({
   userName,
   userAvatar,
   timeRemaining = "44:23",
+  isWarning = false,
 }) => {
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    return (localStorage.getItem("theme") as "dark" | "light") ?? "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  };
+
   return (
-    <header className="interview-navbar">
-      {/* Left */}
-      <div className="nav-left">
-        <div className="logo-mark">
-          <Terminal size={13} strokeWidth={2.5} />
-        </div>
-        <span className="logo-text">InterviewOS</span>
-        <div className="nav-divider" />
-        <span className="session-label">Session</span>
-        <code className="session-id">{sessionId?.slice(0, 8) ?? "a3f9c1b2"}</code>
+    <header className="interview-topbar">
+      {/* Left: wordmark and session id (mono, muted) */}
+      <div className="topbar-left">
+        <span className="session-tag">session</span>
+        <code className="session-code">
+          {sessionId ? sessionId.slice(0, 8) : "a3f9c1b2"}
+        </code>
       </div>
 
-      {/* Center — timer */}
-      <div className="nav-center">
-        <div className="timer-chip">
-          <span className="timer-dot" />
-          <span className="timer-value">{timeRemaining}</span>
-          <span className="timer-unit">remaining</span>
-        </div>
+      {/* Center: timer centered in mono, plain text, no pill background */}
+      <div className="topbar-center">
+        <span
+          className={`topbar-timer ${isWarning ? "timer-warning" : ""}`}
+          aria-label={`Time remaining: ${timeRemaining}`}
+        >
+          {timeRemaining}
+        </span>
       </div>
 
-      {/* Right */}
-      <div className="nav-right">
-        <div className="user-pill">
+      {/* Right: user name and theme toggle */}
+      <div className="topbar-right">
+        <button
+          className="theme-toggle-btn"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+          title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+        >
+          {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+        </button>
+
+        <div className="user-profile">
           {userAvatar ? (
-            <img src={userAvatar} alt={userName ?? "User"} className="user-avatar" />
+            <img src={userAvatar} alt="" className="user-avatar-img" />
           ) : (
-            <div className="user-avatar-placeholder">
-              {(userName ?? "U")[0].toUpperCase()}
+            <div className="user-avatar-fallback">
+              {(userName ?? "C")[0].toUpperCase()}
             </div>
           )}
-          <span className="user-name">{userName ?? "Candidate"}</span>
+          <span className="user-display-name">{userName ?? "Candidate"}</span>
         </div>
       </div>
     </header>

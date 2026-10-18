@@ -1,0 +1,473 @@
+/* ═══════════════════════════════════════════════════════════════════
+   InterviewOS — Device Check Page Styles
+   Flat, dense, terminal/IDE-inspired (Geist / Linear / Zed)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.device-check-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.device-check-header-bar {
+  height: 44px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.device-check-session-code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.device-check-container {
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.device-check-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.device-check-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.device-check-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ── Two-column grid ────────────────────────────────────────────── */
+.device-check-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 820px) {
+  .device-check-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* ── Left Column: Preview ───────────────────────────────────────── */
+.preview-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.camera-preview-box {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--editor-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-preview-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* Mirrored */
+}
+
+.camera-preview-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+.device-selector-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.device-selector-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.device-select {
+  background: var(--raised);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition);
+  width: 100%;
+}
+
+.device-select:hover:not(:disabled) {
+  border-color: var(--border-strong);
+}
+
+.device-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Right Column: Checklist & Controls ─────────────────────────── */
+.checklist-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.check-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.check-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.check-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.check-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.check-item-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.check-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.check-status-dot.dot-working {
+  background: var(--pass);
+}
+
+.check-status-dot.dot-waiting {
+  background: var(--accent);
+}
+
+.check-status-dot.dot-not-requested {
+  background: var(--text-faint);
+}
+
+.check-status-dot.dot-error {
+  background: var(--fail);
+}
+
+/* ── Audio Level Meter ──────────────────────────────────────────── */
+.audio-meter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.audio-meter-track {
+  width: 100%;
+  height: 6px;
+  background: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.audio-meter-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 60ms linear;
+}
+
+.audio-meter-hint {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  margin-top: 2px;
+}
+
+.audio-meter-tested {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--pass);
+  margin-top: 2px;
+}
+
+/* ── Speaker Test Row ───────────────────────────────────────────── */
+.speaker-test-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.ghost-check-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.ghost-check-btn:hover {
+  background: var(--raised);
+  border-color: var(--border-strong);
+}
+
+.speaker-feedback-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.speaker-tip-box {
+  background: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── Instruction Block (Blocked / Error) ────────────────────────── */
+.instruction-box {
+  background: var(--raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.instruction-text {
+  font-size: 12.5px;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.recheck-btn {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.recheck-btn:hover {
+  background: var(--panel);
+  border-color: var(--accent);
+}
+
+/* ── Actions & Buttons ──────────────────────────────────────────── */
+.checklist-action-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.enable-permissions-btn {
+  background: var(--raised);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.enable-permissions-btn:hover {
+  border-color: var(--accent);
+  background: var(--panel);
+}
+
+.join-interview-btn {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background var(--transition), border-color var(--transition), opacity var(--transition);
+}
+
+.join-interview-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.join-interview-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.join-disabled-hint {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin: 0;
+  text-align: center;
+}
+
+.back-dashboard-link {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  align-self: center;
+  transition: color var(--transition);
+}
+
+.back-dashboard-link:hover {
+  color: var(--text);
+}
+
+/* ── In IDE Disconnection Banner ────────────────────────────────── */
+.device-disconnect-banner {
+  height: 36px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--fail);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 12.5px;
+  z-index: 1000;
+}
+
+.device-disconnect-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+.disconnect-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fail);
+}
+
+.disconnect-fix-btn {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.disconnect-fix-btn:hover {
+  border-color: var(--accent);
+  background: var(--raised);
+}

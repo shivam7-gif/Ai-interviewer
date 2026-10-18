@@ -3,12 +3,7 @@ import axios from "axios";
 import { BACKEND_URL } from "../../lib/config";
 import type { VoiceState } from "./types";
 
-const AI_MESSAGES = [
-  "Hello! I'm Sarah, your AI interviewer for today. Let's start with the \"Breakfast\" problem — a classic topological sort question. Are you familiar with topological sort?",
-  "Great approach! Using a min-heap ensures we always pick the smallest numbered node when there are multiple choices. Can you walk me through the time complexity of your solution?",
-  "Exactly right — O((N + M) log N) due to the priority queue operations. Now, what edge cases should we consider?",
-  "Spot on. A cycle in the graph makes a valid ordering impossible. Kahn's algorithm detects this when the result has fewer elements than N. Let's code it up!",
-];
+const AI_MESSAGES: string[] = [];
 
 export function useVoiceStatus() {
   const [voiceState, setVoiceState] = useState<VoiceState>("listening");
@@ -32,12 +27,9 @@ export function useVoiceStatus() {
 }
 
 export function useChatMessages(projectId?: string) {
-  const [messages, setMessages] = useState([
-    { id: "1", role: "ai" as const, text: AI_MESSAGES[0] ?? "", timestamp: new Date(Date.now() - 120000) },
-    { id: "2", role: "user" as const, text: "Yes, I think we can use a min-heap to get the lexicographically smallest topological order.", timestamp: new Date(Date.now() - 90000) },
-    { id: "3", role: "ai" as const, text: AI_MESSAGES[1] ?? "", timestamp: new Date(Date.now() - 60000) },
-    { id: "4", role: "user" as const, text: "It should be O((N + M) log N) because each push/pop into the priority queue takes log N time and we do it for every node and edge.", timestamp: new Date(Date.now() - 30000) },
-  ]);
+  const [messages, setMessages] = useState<
+    Array<{ id: string; role: "ai" | "user"; text: string; timestamp: Date }>
+  >([]);
   const [isSending, setIsSending] = useState(false);
 
   const addMessage = useCallback(
@@ -87,17 +79,45 @@ export function useChatMessages(projectId?: string) {
   return { messages, addMessage, isSending };
 }
 
-export function useCamera() {
+export function useCamera(
+  existingStream?: MediaStream | null,
+  onTrackEnded?: (kind: "video" | "audio") => void
+) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [status, setStatus] = useState<"loading" | "live" | "denied">("loading");
   const [micMuted, setMicMuted] = useState(false);
   const [camOff, setCamOff] = useState(false);
-  const streamRef = useRef<MediaStream | null>(null);
+  const streamRef = useRef<MediaStream | null>(existingStream ?? null);
 
   useEffect(() => {
+    if (existingStream) {
+      streamRef.current = existingStream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = existingStream;
+        void videoRef.current.play().catch(() => {});
+      }
+      setStatus("live");
+
+      const videoTrack = existingStream.getVideoTracks()[0];
+      const audioTrack = existingStream.getAudioTracks()[0];
+
+      const handleVideoEnded = () => onTrackEnded?.("video");
+      const handleAudioEnded = () => onTrackEnded?.("audio");
+
+      videoTrack?.addEventListener("ended", handleVideoEnded);
+      audioTrack?.addEventListener("ended", handleAudioEnded);
+
+      return () => {
+        videoTrack?.removeEventListener("ended", handleVideoEnded);
+        audioTrack?.removeEventListener("ended", handleAudioEnded);
+      };
+    }
+
+    let localStream: MediaStream | null = null;
     navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: "user" }, audio: false })
+      ?.getUserMedia({ video: { facingMode: "user" }, audio: false })
       .then((stream) => {
+        localStream = stream;
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -108,8 +128,16 @@ export function useCamera() {
       .catch(() => setStatus("denied"));
 
     return () => {
-      streamRef.current?.getTracks().forEach((t) => t.stop());
+      localStream?.getTracks().forEach((t) => t.stop());
     };
+  }, [existingStream, onTrackEnded]);
+
+  const attachVideo = useCallback((node: HTMLVideoElement | null) => {
+    videoRef.current = node;
+    if (node && streamRef.current) {
+      node.srcObject = streamRef.current;
+      void node.play().catch(() => {});
+    }
   }, []);
 
   const toggleCam = useCallback(() => {
@@ -120,7 +148,7 @@ export function useCamera() {
     }
   }, [camOff]);
 
-  return { videoRef, status, micMuted, setMicMuted, camOff, toggleCam };
+  return { videoRef, attachVideo, status, micMuted, setMicMuted, camOff, toggleCam };
 }
 
 export function useEditorAutoSave(code: string) {

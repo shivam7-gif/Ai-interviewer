@@ -14,6 +14,8 @@ import interviewRoutes from "./routes/interview.routes.js";
 import playlistRoutes from "./routes/playlist.routes.js";
 import questionRoutes from "./routes/question.routes.js";
 import liveKitRoutes from "./routes/livekit.routes.js";
+import codeforcesRoutes from "./routes/codeforces.routes.js";
+import ingestRoutes from "./routes/ingest.routes.js";
 
 // ── App setup ─────────────────────────────────────────────────────────────────
 const app = express();
@@ -80,6 +82,8 @@ app.get("/health/ready", async (_req, res) => {
 // ── API Routes (with global rate limiter) ──────────────────────────────────────
 app.use("/api", apiLimiter);
 app.use("/api/v1", interviewRoutes);
+app.use("/api/v1/codeforces", codeforcesRoutes);
+app.use("/api/v1/ingest", ingestRoutes);
 app.use("/api/playlists", playlistRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/livekit", liveKitRoutes);

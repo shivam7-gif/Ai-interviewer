@@ -1,15 +1,5 @@
 import React, { useState } from "react";
-import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  Cpu,
-  ChevronUp,
-  ChevronDown,
-  Terminal,
-  FileOutput,
-  FlaskConical,
-} from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import type { TestTabId, TestResult } from "../types";
 
 const MOCK_RESULTS: TestResult[] = [
@@ -40,17 +30,15 @@ const MOCK_RESULTS: TestResult[] = [
 ];
 
 interface TestResultsProps {
+  hasRun?: boolean;
+  running?: boolean;
   collapsed?: boolean;
   onToggle?: () => void;
 }
 
-const TAB_ICONS: Record<TestTabId, React.ComponentType<{ size?: number; className?: string }>> = {
-  "Test Results": FlaskConical,
-  Console: Terminal,
-  Output: FileOutput,
-};
-
 export const TestResults: React.FC<TestResultsProps> = ({
+  hasRun = false,
+  running = false,
   collapsed = false,
   onToggle,
 }) => {
@@ -59,117 +47,124 @@ export const TestResults: React.FC<TestResultsProps> = ({
 
   const passCount = MOCK_RESULTS.filter((r) => r.passed).length;
   const totalCount = MOCK_RESULTS.length;
-  const allPassed = passCount === totalCount;
-  const result = MOCK_RESULTS[selectedCase];
+  const result = MOCK_RESULTS[selectedCase] ?? MOCK_RESULTS[0];
 
   return (
     <div className="test-results-panel">
-      {/* Tab bar + toggle */}
+      {/* Header with text tabs and amber underline on active tab */}
       <div className="test-tab-bar">
-        <div className="test-tabs">
+        <div className="test-tabs-group" role="tablist">
           {(["Test Results", "Console", "Output"] as TestTabId[]).map((tab) => {
-            const Icon = TAB_ICONS[tab];
             const active = tab === activeTab;
             return (
               <button
                 key={tab}
+                role="tab"
+                aria-selected={active}
                 onClick={() => setActiveTab(tab)}
-                className={`test-tab ${active ? "test-tab-active" : ""}`}
+                className={`text-tab-btn ${active ? "tab-active" : ""}`}
               >
-                <Icon size={13} />
                 {tab}
-                {tab === "Test Results" && (
-                  <span
-                    className={`test-count-badge ${allPassed ? "test-count-pass" : "test-count-fail"}`}
-                  >
-                    {passCount}/{totalCount}
-                  </span>
-                )}
+                {active && <span className="tab-underline" aria-hidden="true" />}
               </button>
             );
           })}
         </div>
-        <button className="test-collapse-btn" onClick={onToggle}>
-          {collapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          <span>{collapsed ? "Expand" : "Collapse"}</span>
+
+        <button
+          className="collapse-toggle-btn"
+          onClick={onToggle}
+          aria-label={collapsed ? "Expand test panel" : "Collapse test panel"}
+          title={collapsed ? "Expand panel" : "Collapse panel"}
+        >
+          {collapsed ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+          <span className="collapse-text">{collapsed ? "Expand" : "Collapse"}</span>
         </button>
       </div>
 
       {/* Body */}
       {!collapsed && (
-        <div className="test-results-body">
+        <div className="test-body">
           {activeTab === "Test Results" && (
-            <div className="test-results-content">
-              {/* Summary */}
-              <div className="test-summary">
-                {allPassed ? (
-                  <div className="test-summary-pass">
-                    <CheckCircle size={16} />
-                    <span>All test cases passed</span>
-                  </div>
-                ) : (
-                  <div className="test-summary-fail">
-                    <XCircle size={16} />
-                    <span>{totalCount - passCount} test case(s) failed</span>
-                  </div>
-                )}
-                <div className="test-perf">
-                  <Clock size={12} />
-                  <span>2ms</span>
-                  <Cpu size={12} style={{ marginLeft: 8 }} />
-                  <span>8.4MB</span>
+            <div className="test-content">
+              {!hasRun ? (
+                <div className="empty-results-msg">
+                  {running ? "Executing test cases..." : "Run your code to see results."}
                 </div>
-              </div>
+              ) : (
+                <>
+                  {/* Summary line in mono */}
+                  <div className="test-mono-summary">
+                    {passCount} of {totalCount} passed - 2 ms - 8.4 MB
+                  </div>
 
-              {/* Case selector */}
-              <div className="test-case-selector">
-                {MOCK_RESULTS.map((r, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedCase(i)}
-                    className={`test-case-btn ${selectedCase === i ? "test-case-btn-active" : ""}`}
-                  >
-                    {r.passed ? (
-                      <CheckCircle size={12} className="test-case-pass-icon" />
-                    ) : (
-                      <XCircle size={12} className="test-case-fail-icon" />
-                    )}
-                    Case {i + 1}
-                  </button>
-                ))}
-              </div>
+                  {/* Segmented case buttons with pass/fail dots */}
+                  <div className="case-segmented-bar" role="tablist">
+                    {MOCK_RESULTS.map((r, i) => (
+                      <button
+                        key={i}
+                        role="tab"
+                        aria-selected={selectedCase === i}
+                        onClick={() => setSelectedCase(i)}
+                        className={`case-segment-btn ${
+                          selectedCase === i ? "case-selected" : ""
+                        }`}
+                      >
+                        <span
+                          className={`case-dot ${
+                            r.passed ? "dot-pass" : "dot-fail"
+                          }`}
+                          aria-hidden="true"
+                        />
+                        <span>Case {i + 1}</span>
+                      </button>
+                    ))}
+                  </div>
 
-              {/* Case details */}
-              <div className="test-case-detail">
-                <TestBlock label="Input" value={result.input} />
-                <TestBlock label="Expected Output" value={result.expected} />
-                <TestBlock
-                  label="Your Output"
-                  value={result.got}
-                  highlight={!result.passed}
-                />
-              </div>
+                  {/* Labeled mono blocks for Input, Expected, and Actual */}
+                  {result && (
+                    <div className="case-details-grid">
+                      <TestBlock label="Input" value={result.input} />
+                      <TestBlock label="Expected" value={result.expected} />
+                      <TestBlock
+                        label="Actual"
+                        value={result.got}
+                        mismatch={!result.passed}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
           {activeTab === "Console" && (
-            <div className="test-console">
-              <div className="console-line console-info">[INFO] Compiling solution...</div>
-              <div className="console-line console-success">[OK] Compilation successful.</div>
-              <div className="console-line console-info">[INFO] Running test cases...</div>
-              <div className="console-line console-success">[PASS] Test 1: 2ms / 8.2MB</div>
-              <div className="console-line console-danger">[FAIL] Test 2: Expected -1, got 1 2 3</div>
-              <div className="console-line console-success">[PASS] Test 3: 3ms / 9.1MB</div>
-              <div className="console-line console-dim">―――――――――――――――――――――</div>
-              <div className="console-line console-warning">2/3 test cases passed.</div>
+            <div className="test-mono-console">
+              {!hasRun ? (
+                <div className="empty-results-msg">No console logs yet.</div>
+              ) : (
+                <>
+                  <div className="console-row">[build] compilation target: standard-x86_64</div>
+                  <div className="console-row">[status] compilation completed without warnings</div>
+                  <div className="console-row">[test 1] 4 nodes, 3 edges - 2 ms (passed)</div>
+                  <div className="console-row fail-line">[test 2] cycle detected or invalid topo order - 1 ms (failed)</div>
+                  <div className="console-row">[test 3] 5 nodes, 5 edges - 3 ms (passed)</div>
+                </>
+              )}
             </div>
           )}
 
           {activeTab === "Output" && (
-            <div className="test-console">
-              <div className="console-line console-dim">1 2 3 4</div>
-              <div className="console-line console-dim">1 2 3</div>
-              <div className="console-line console-dim">1 2 3 4 5</div>
+            <div className="test-mono-console">
+              {!hasRun ? (
+                <div className="empty-results-msg">No program output yet.</div>
+              ) : (
+                <>
+                  <div className="console-row">1 2 3 4</div>
+                  <div className="console-row fail-line">1 2 3</div>
+                  <div className="console-row">1 2 3 4 5</div>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -181,13 +176,11 @@ export const TestResults: React.FC<TestResultsProps> = ({
 const TestBlock: React.FC<{
   label: string;
   value: string;
-  highlight?: boolean;
-}> = ({ label, value, highlight }) => (
-  <div style={{ marginBottom: 10 }}>
-    <div className="test-block-label">{label}</div>
-    <pre
-      className={`test-block-code ${highlight ? "test-block-code-fail" : ""}`}
-    >
+  mismatch?: boolean;
+}> = ({ label, value, mismatch = false }) => (
+  <div className="test-block-wrapper">
+    <div className="test-block-title">{label}</div>
+    <pre className={`test-block-content ${mismatch ? "mismatch-fail" : ""}`}>
       {value}
     </pre>
   </div>

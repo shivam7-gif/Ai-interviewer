@@ -5,6 +5,7 @@ import { LoginPage } from "./pages/Login";
 import { LandingPage } from "./pages/LandingPage";
 import { AppLayout } from "./components/layout/AppLayout";
 import { InterviewPage } from "./features/interview/InterviewPage";
+import { DeviceCheckPage } from "./features/interview/pages/DeviceCheckPage";
 
 // Placeholder for routes not yet built
 const Placeholder = ({ title }: { title: string }) => (
@@ -52,7 +53,8 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {/* New full-featured interview page */}
+      {/* Device setup check and interview room */}
+      <Route path="/project/:projectId/check" element={<DeviceCheckPage />} />
       <Route path="/project/:projectId" element={<InterviewPage />} />
     </Routes>
   );

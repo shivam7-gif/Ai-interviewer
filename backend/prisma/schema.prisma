@@ -211,3 +211,22 @@ enum Difficulty {
   Intermediate
   Advanced
 }
+
+model CodeforcesProfile {
+  id                  String   @id @default(uuid())
+  handle              String   @unique
+  rating              Int?
+  maxRating           Int?     @map("max_rating")
+  rank                String?
+  maxRank             String?  @map("max_rank")
+  solvedRecent        Int      @default(0) @map("solved_recent")
+  submissionsAnalysed Int      @default(0) @map("submissions_analysed")
+  strongTags          String[] @default([]) @map("strong_tags")
+  weakTags            String[] @default([]) @map("weak_tags")
+  summary             String?
+  profileData         Json?    @map("profile_data")
+  fetchedAt           DateTime @default(now()) @map("fetched_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@map("codeforces_profiles")
+}

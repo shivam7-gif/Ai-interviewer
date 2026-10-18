@@ -8,49 +8,69 @@ interface LeftPanelProps {
   projectId: string;
   userName?: string;
   userAvatar?: string;
+  camera?: ReturnType<typeof useCamera>;
 }
 
 export const LeftPanel: React.FC<LeftPanelProps> = ({
-  projectId: _,
+  projectId,
   userName = "You",
+  camera,
 }) => {
   const voiceState = useVoiceStatus();
-  const { messages } = useChatMessages();
-  const { videoRef, status, micMuted, setMicMuted, camOff, toggleCam } = useCamera();
-  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const { messages } = useChatMessages(projectId);
+  const internalCamera = useCamera();
+  const cam = camera ?? internalCamera;
+  const { attachVideo, status, micMuted, setMicMuted, camOff, toggleCam } = cam;
+  const captionsBottomRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll chat to bottom
+  // Take the last 3 lines of the transcript
+  const recentMessages = messages.slice(-3);
+
   useEffect(() => {
-    chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    captionsBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [recentMessages]);
 
   const isSpeaking = voiceState === "speaking";
 
   return (
     <div className="left-panel">
-      {/* ── Top 65% — AI Interviewer ─────────────────────────────── */}
-      <div className="left-top">
-        {/* Avatar section */}
-        <div className="ai-section">
+      {/* ── Top section — AI Interviewer & Live Captions ────────── */}
+      <div className="interviewer-section">
+        {/* Flat audio indicator */}
+        <div className="interviewer-avatar-area">
           <AIAvatar speaking={isSpeaking} />
         </div>
 
-        {/* Chat transcript */}
-        {/* <div className="chat-area">
-          {messages.map((msg) => (
-            <ChatBubble key={msg.id} message={msg} />
-          ))}
-          <div ref={chatBottomRef} />
-        </div> */}
-
-        {/* Voice status */}
+        {/* Status line & LIVE badge */}
         <VoiceStatus state={voiceState} />
+
+        {/* Live captions (last 3 lines of transcript) */}
+        <div className="captions-area" aria-live="polite">
+          <div className="captions-list">
+            {recentMessages.length > 0 ? (
+              recentMessages.map((msg) => {
+                const isAi = msg.role === "ai";
+                const speakerLabel = isAi ? "Alex" : "You";
+                return (
+                  <div
+                    key={msg.id}
+                    className={`caption-line ${isAi ? "caption-ai" : "caption-user"}`}
+                  >
+                    <span className="caption-speaker">{speakerLabel}:</span>
+                    <span className="caption-text">{msg.text}</span>
+                  </div>
+                );
+              })
+            ) : null}
+            <div ref={captionsBottomRef} />
+          </div>
+        </div>
       </div>
 
-      {/* ── Bottom 35% — Webcam ───────────────────────────────────── */}
-      <div className="left-bottom">
+      {/* ── Bottom section — Candidate tile ────────────────────── */}
+      <div className="candidate-section">
         <WebcamCard
-          videoRef={videoRef}
+          videoRef={attachVideo}
           status={status}
           label={userName}
           micMuted={micMuted}

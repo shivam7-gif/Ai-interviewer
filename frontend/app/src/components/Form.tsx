@@ -25,9 +25,22 @@ export function Form() {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/v1/pre-interview`, {
-        gitHub,
-      });
+      const inputVal = gitHub.trim();
+      const payload: { gitHub?: string; codeforcesHandle?: string } = {};
+
+      if (
+        /codeforces\.com/i.test(inputVal) ||
+        (!inputVal.startsWith("http") && !inputVal.includes("/"))
+      ) {
+        payload.codeforcesHandle = inputVal;
+      } else {
+        payload.gitHub = inputVal;
+      }
+
+      const response = await axios.post(
+        `${BACKEND_URL}/api/v1/pre-interview`,
+        payload
+      );
 
       const projectId = response.data.projectId ?? response.data.project?.id;
 
@@ -40,7 +53,7 @@ export function Form() {
       }
 
       navigate(`/project/${projectId}`);
-      console.log("Form submitted", { gitHub, projectId });
+      console.log("Form submitted", { payload, projectId });
     } catch (error) {
       toast("Something went wrong", {
         description: "Failed to start the interview.",
@@ -58,8 +71,9 @@ export function Form() {
           Ai Interviewer Kickstart
         </h2>
         <input
-          placeholder="GitHub URL"
+          placeholder="GitHub URL or Codeforces Handle"
           onChange={(e) => setGitHub(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && onSubmit()}
         />
         <div className="flex justify-center pt-4">
           <button onClick={onSubmit} disabled={loading}>

@@ -1,17 +1,26 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import {
   Play,
-  CheckCircle,
-  ChevronDown,
-  Flag,
-  Sparkles,
-  Settings,
   RotateCcw,
+  Sparkles,
+  Flag,
+  Check,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 
 const LANGUAGES = [
-  "C++", "Python", "JavaScript", "TypeScript", "Java",
-  "C", "C#", "Go", "Rust", "Kotlin", "Swift",
+  "C++",
+  "Python",
+  "JavaScript",
+  "TypeScript",
+  "Java",
+  "C",
+  "C#",
+  "Go",
+  "Rust",
+  "Kotlin",
+  "Swift",
 ];
 
 interface EditorToolbarProps {
@@ -22,6 +31,8 @@ interface EditorToolbarProps {
   onReset: () => void;
   running?: boolean;
   submitted?: boolean;
+  isFullIde?: boolean;
+  onToggleFullIde?: () => void;
 }
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
@@ -32,100 +43,107 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   onReset,
   running = false,
   submitted = false,
+  isFullIde = false,
+  onToggleFullIde,
 }) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
   return (
     <div className="editor-toolbar">
-      {/* Left — language picker */}
-      <div ref={ref} style={{ position: "relative" }}>
-        <button
-          className="lang-dropdown-btn"
-          onClick={() => setOpen((o) => !o)}
-          id="language-dropdown"
+      {/* Left: Language selector as a plain bordered select */}
+      <div className="toolbar-left">
+        <label htmlFor="language-select" className="sr-only">
+          Select Programming Language
+        </label>
+        <select
+          id="language-select"
+          className="lang-select"
+          value={language}
+          onChange={(e) => onLanguageChange(e.target.value)}
         >
-          <span className="lang-dot" />
-          <span>{language}</span>
-          <ChevronDown
-            size={13}
-            style={{
-              transition: "transform 0.15s",
-              transform: open ? "rotate(180deg)" : "none",
-              color: "#52525B",
-            }}
-          />
-        </button>
-
-        {open && (
-          <div className="lang-dropdown-menu">
-            <div className="lang-dropdown-header">Language</div>
-            {LANGUAGES.map((lang) => (
-              <button
-                key={lang}
-                className={`lang-option ${lang === language ? "lang-option-active" : ""}`}
-                onClick={() => {
-                  onLanguageChange(lang);
-                  setOpen(false);
-                }}
-              >
-                <span className={`lang-option-dot ${lang === language ? "lang-option-dot-active" : ""}`} />
-                {lang}
-                {lang === language && (
-                  <CheckCircle size={13} style={{ marginLeft: "auto", color: "#FACC15" }} />
-                )}
-              </button>
-            ))}
-          </div>
-        )}
+          {LANGUAGES.map((lang) => (
+            <option key={lang} value={lang}>
+              {lang}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Right — action buttons */}
-      <div className="toolbar-actions">
-        <button className="toolbar-btn-icon" onClick={onReset} title="Reset code">
-          <RotateCcw size={14} />
-        </button>
-        <button className="toolbar-btn-icon" title="AI Helper">
-          <Sparkles size={14} />
-          <span>AI Helper</span>
-        </button>
-        <button className="toolbar-btn-icon toolbar-btn-report" title="Report issue">
-          <Flag size={14} />
-        </button>
-        <div className="toolbar-separator" />
+      {/* Right: Actions */}
+      <div className="toolbar-right">
+        {/* Ghost icon buttons: Reset, Hint, Report */}
         <button
-          className={`toolbar-run-btn ${running ? "toolbar-run-btn-loading" : ""}`}
+          type="button"
+          className="ghost-toolbar-btn"
+          onClick={onReset}
+          title="Reset code (Ctrl+R)"
+          aria-label="Reset code"
+        >
+          <RotateCcw size={14} aria-hidden="true" />
+        </button>
+
+        <button
+          type="button"
+          className="ghost-toolbar-btn"
+          title="Hint (1/3)"
+          aria-label="Hint 1 of 3"
+        >
+          <Sparkles size={14} aria-hidden="true" />
+        </button>
+
+        <button
+          type="button"
+          className="ghost-toolbar-btn"
+          title="Report issue"
+          aria-label="Report issue"
+        >
+          <Flag size={14} aria-hidden="true" />
+        </button>
+
+        {onToggleFullIde && (
+          <button
+            type="button"
+            className={`ghost-toolbar-btn full-ide-btn ${isFullIde ? "active" : ""}`}
+            onClick={onToggleFullIde}
+            title={isFullIde ? "Exit Full IDE (Esc)" : "Full IDE"}
+            aria-label={isFullIde ? "Exit Full IDE" : "Full IDE"}
+          >
+            {isFullIde ? (
+              <Minimize2 size={14} aria-hidden="true" />
+            ) : (
+              <Maximize2 size={14} aria-hidden="true" />
+            )}
+          </button>
+        )}
+
+        <div className="toolbar-divider" />
+
+        {/* Run button: secondary outlined button */}
+        <button
+          type="button"
+          className="secondary-run-btn"
           onClick={onRun}
           disabled={running}
           id="run-btn"
+          title="Run code (Ctrl+Enter)"
+          aria-label="Run code (Ctrl+Enter)"
         >
-          {running ? (
-            <span className="btn-spinner" />
-          ) : (
-            <Play size={13} fill="currentColor" />
-          )}
+          <Play size={12} fill="currentColor" aria-hidden="true" />
           <span>{running ? "Running..." : "Run"}</span>
-          <span className="toolbar-shortcut">⌘↵</span>
         </button>
+
+        {/* Submit button: single primary amber button with dark text */}
         <button
-          className={`toolbar-submit-btn ${submitted ? "toolbar-submit-btn-success" : ""}`}
+          type="button"
+          className={`primary-submit-btn ${submitted ? "submit-success" : ""}`}
           onClick={onSubmit}
+          disabled={running}
           id="submit-btn"
+          title="Submit code (Ctrl+Shift+Enter)"
+          aria-label="Submit code (Ctrl+Shift+Enter)"
         >
-          {submitted ? <CheckCircle size={13} /> : <CheckCircle size={13} />}
-          <span>{submitted ? "Accepted!" : "Submit"}</span>
-          <span className="toolbar-shortcut">⌘⇧↵</span>
-        </button>
-        <button className="toolbar-btn-icon" title="Settings">
-          <Settings size={14} />
+          {submitted ? (
+            <Check size={13} strokeWidth={2.5} aria-hidden="true" />
+          ) : null}
+          <span>{submitted ? "Accepted" : "Submit"}</span>
         </button>
       </div>
     </div>

@@ -8,13 +8,18 @@ import {
   extractGitHubUsername,
   fetchGitHubRepos,
 } from "../services/github.service.js";
+import {
+  fetchCodeforcesProfile,
+  codeforcesToText,
+  saveCodeforcesProfileToDb,
+} from "../services/codeforces.service.js";
 import { AIService } from "../services/ai.service.js";
 import { prisma } from "../config/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 
 /**
  * POST /api/v1/pre-interview
- * Accepts a GitHub URL, fetches repos, and creates an interview session.
+ * Accepts GitHub URL, Codeforces handle, and/or Resume text to initialize an interview session.
  */
 export const createPreInterview = async (
   req: Request,
@@ -32,30 +37,132 @@ export const createPreInterview = async (
     return;
   }
 
-  const { gitHub } = parsed.data;
+  const {
+    gitHub,
+    codeforcesHandle,
+    resumeText,
+    resumeWords,
+    candidateId,
+    questionId,
+  } = parsed.data;
 
   try {
-    const username = extractGitHubUsername(gitHub);
-    const repos = await fetchGitHubRepos(username);
+    let username = "candidate";
+    let repos: any[] = [];
+    let codeforcesProfile: any = null;
+
+    // Auto-detect if gitHub input is actually a Codeforces URL
+    const effectiveCfHandle =
+      codeforcesHandle ||
+      (gitHub && /codeforces\.com/i.test(gitHub) ? gitHub : undefined);
+    const effectiveGithub =
+      gitHub && !/codeforces\.com/i.test(gitHub) ? gitHub : undefined;
+
+    if (effectiveGithub) {
+      try {
+        username = extractGitHubUsername(effectiveGithub);
+        repos = await fetchGitHubRepos(username);
+      } catch (err) {
+        console.warn("Could not fetch GitHub repos:", err);
+      }
+    }
+
+    if (effectiveCfHandle) {
+      try {
+        codeforcesProfile = await fetchCodeforcesProfile(effectiveCfHandle);
+        const cfSummary = codeforcesToText(codeforcesProfile);
+
+        // Console the Codeforces response
+        console.log("\n==========================================");
+        console.log("=== [Codeforces API Response Fetched] ===");
+        console.log("==========================================");
+        console.log(JSON.stringify({ profile: codeforcesProfile, summary: cfSummary }, null, 2));
+
+        // Persist to PostgreSQL database
+        await saveCodeforcesProfileToDb(codeforcesProfile, cfSummary);
+        console.log(`[DB] Successfully stored profile for '${codeforcesProfile.handle}' in PostgreSQL\n`);
+
+        if (username === "candidate") {
+          username = codeforcesProfile.handle;
+        }
+      } catch (err) {
+        console.warn("Could not fetch Codeforces profile:", err);
+      }
+    }
+
+    // Resolve or connectOrCreate candidate
+    const sanitizedUsername =
+      username.replace(/[^a-zA-Z0-9_.-]/g, "") || "candidate";
+    const candidateEmail = `${sanitizedUsername.toLowerCase()}@candidate.interviewos.ai`;
+
+    const candidateConnect = candidateId
+      ? { connect: { id: candidateId } }
+      : {
+          connectOrCreate: {
+            where: { email: candidateEmail },
+            create: {
+              email: candidateEmail,
+              name: username,
+              role: "Candidate" as const,
+            },
+          },
+        };
+
+    // Resolve question: connect specified, existing, or create a default assessment question
+    const existingQuestion = questionId
+      ? { id: questionId }
+      : await prisma.question.findFirst({ select: { id: true } });
+
+    const questionConnect = existingQuestion
+      ? { connect: { id: existingQuestion.id } }
+      : {
+          connectOrCreate: {
+            where: { slug: "system-design-github-assessment" },
+            create: {
+              slug: "system-design-github-assessment",
+              title: "Technical Assessment",
+              description:
+                "Technical interview assessment based on candidate portfolio and problem solving.",
+              difficulty: "Intermediate" as const,
+            },
+          },
+        };
 
     const interview = await prisma.interview.create({
       data: {
         metaData: {
-          githubUrl: gitHub,
+          githubUrl: gitHub ?? null,
           repos: repos as any,
+          codeforces: codeforcesProfile ?? null,
+          resume: resumeText
+            ? {
+                text: resumeText,
+                words:
+                  resumeWords ?? resumeText.trim().split(/\s+/).length,
+              }
+            : null,
         },
         status: "Pre",
         score: 0,
-        candidate: { connect: { id: "00000000-0000-0000-0000-000000000000" } },
-        question: { connect: { id: "00000000-0000-0000-0000-000000000000" } },
-      } as any,
+        candidate: candidateConnect,
+        question: questionConnect,
+      },
     });
 
-    res.status(201).json({
+    const responseData = {
       success: true,
       projectId: interview.id,
       repos,
-    });
+      codeforces: codeforcesProfile,
+      resume: resumeText
+        ? { words: resumeWords ?? resumeText.trim().split(/\s+/).length }
+        : null,
+    };
+
+    console.log("\n=== [Pre-Interview Session Created] ===");
+    console.log(JSON.stringify(responseData, null, 2));
+
+    res.status(201).json(responseData);
   } catch (error) {
     next(error);
   }
