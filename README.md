@@ -1,6 +1,6 @@
 <!-- Header -->
 <div align="center">
-  <h1>🎙️ InterviewOS AI</h1>
+  <h1> InterviewOS AI</h1>
   <p><strong>Real-time AI-powered technical interview platform</strong></p>
   <p>
     <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white" />
