@@ -23,8 +23,7 @@
 ## 🚀 What is InterviewOS AI?
 
 **InterviewOS AI** is a full-stack web application that conducts intelligent, real-time technical interviews powered by voice AI. Instead of generic LeetCode grinding, the AI analyses your **actual GitHub repositories** and asks contextual questions about your own work — while you code live in a Monaco editor.
-
-Think: "*An AI interviewer that actually read your résumé*."
+"
 
 ---
 
