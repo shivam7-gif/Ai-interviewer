@@ -20,27 +20,27 @@
 
 ---
 
-## 🚀 What is InterviewOS AI?
+##  What is InterviewOS AI?
 
 **InterviewOS AI** is a full-stack web application that conducts intelligent, real-time technical interviews powered by voice AI. Instead of generic LeetCode grinding, the AI analyses your **actual GitHub repositories** and asks contextual questions about your own work — while you code live in a Monaco editor.
 "
 
 ---
 
-## ✨ Features
+##  Features
 
 | Feature | Description |
 |---|---|
-| 🎙️ **Voice AI Interviewer** | Real-time WebRTC audio via LiveKit for a natural interview feel |
-| 💻 **Monaco Code Editor** | VS Code-grade editor with syntax highlighting for 15+ languages |
-| 📂 **GitHub Integration** | Fetches your public repos and generates context-aware questions |
-| 🔐 **Google OAuth** | One-click sign-in, no passwords required |
-| 📊 **Interview Sessions** | Each session is stored in PostgreSQL for review and scoring |
-| ⚡ **Real-time Sync** | Socket.IO for live collaboration and event streaming |
+|  **Voice AI Interviewer** | Real-time WebRTC audio via LiveKit for a natural interview feel |
+|  **Monaco Code Editor** | VS Code-grade editor with syntax highlighting for 15+ languages |
+|  **GitHub Integration** | Fetches your public repos and generates context-aware questions |
+|  **Google OAuth** | One-click sign-in, no passwords required |
+|  **Interview Sessions** | Each session is stored in PostgreSQL for review and scoring |
+|  **Real-time Sync** | Socket.IO for live collaboration and event streaming |
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -71,7 +71,7 @@
 
 ---
 
-## ⚡ Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -80,7 +80,7 @@
 - [LiveKit Cloud](https://livekit.io/) account (free tier works)
 - Google Cloud OAuth credentials
 
-### 🐳 Option A: 1-Command Docker Setup (Recommended)
+###  Option A: 1-Command Docker Setup (Recommended)
 
 ```bash
 # 1. Copy root environment template
